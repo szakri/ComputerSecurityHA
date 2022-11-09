@@ -30,7 +30,7 @@ Megnézi, hogy a leírásnak megfelelő-e a CAFF.
 Ellenőrzi, hogy a CIFF frame-ek mérete megegyzeik. 
 
 
-### Külső kömybtár
+### Külső könyvtár
 
 A gif-ek generálásához (kis módosításokkal túlindexelés ellen), az alábbi könyvtárt használtuk:
 
