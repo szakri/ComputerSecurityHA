@@ -29,16 +29,16 @@ namespace Backend.Controllers
             if (string.IsNullOrEmpty(searchBy))
             {
                 return Ok(context.Caffs.Include(c => c.Uploader)
-                                          .Include(c => c.Comments)
-                                          .ThenInclude(c => c.User)
-                                          .Where(c => c.IsActive)
-                                          .Select(c => Mapper.ToCaffDTO(c)));
+                                       .Include(c => c.Comments)
+                                       .ThenInclude(c => c.User)
+                                       .Where(c => c.IsActive)
+                                       .Select(c => Mapper.ToCaffDTO(c)));
             }
             return Ok(context.Caffs.Include(c => c.Uploader)
-                                          .Include(c => c.Comments)
-                                          .ThenInclude(c => c.User)
-                                          .Where($"c => c.IsActive && {searchBy}")
-                                          .Select(c => Mapper.ToCaffDTO(c)));
+                                   .Include(c => c.Comments)
+                                   .ThenInclude(c => c.User)
+                                   .Where($"c => c.IsActive && {searchBy}")
+                                   .Select(c => Mapper.ToCaffDTO(c)));
         }
 
         // GET api/caffs/{id}

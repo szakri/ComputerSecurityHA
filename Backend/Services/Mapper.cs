@@ -67,7 +67,8 @@ namespace Backend.Services
                 Id = caffHasher.Encode(caff.Id),
                 Name = caff.Name,
                 Comments = comments,
-                UploaderId = userHasher.Encode(caff.Uploader.Id)
+                UploaderId = userHasher.Encode(caff.Uploader.Id),
+                UploaderUsername = caff.Uploader.Username
             };
         }
 
