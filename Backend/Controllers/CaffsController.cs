@@ -45,48 +45,69 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public ActionResult<CaffDTO> Get(string id)
         {
-            var caff = context.Caffs.Include(c => c.Uploader)
+            try
+            {
+                var caff = context.Caffs.Include(c => c.Uploader)
                                     .Include(c => c.Comments)
                                     .ThenInclude(c => c.User)
                                     .Where(c => c.IsActive)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(id));
-            if (caff == null)
+                if (caff == null)
+                {
+                    return NotFound($"No CAFF file was found with the id {id}!");
+                }
+                return Ok(Mapper.ToCaffDTO(caff));
+            }
+            catch (Exception)
             {
                 return NotFound($"No CAFF file was found with the id {id}!");
             }
-            return Ok(Mapper.ToCaffDTO(caff));
         }
 
         // GET api/caffs/{id}/download
         [HttpGet("{id}/download")]
         public ActionResult Download(string id)
         {
-            var caff = context.Caffs.Where(c => c.IsActive)
+            try
+            {
+                var caff = context.Caffs.Where(c => c.IsActive)
                                     .Include(c => c.Uploader)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(id));
-            if (caff == null)
+                if (caff == null)
+                {
+                    return NotFound($"No CAFF file was found with the id {id}!");
+                }
+                var current = Directory.GetCurrentDirectory();
+                var path = Path.Combine(current, "Files", $"{caff.FilePathWithoutExtension}.caff");
+                return PhysicalFile(path, "application/caff", $"{caff.Name}.caff");
+            }
+            catch (Exception)
             {
                 return NotFound($"No CAFF file was found with the id {id}!");
             }
-            var current = Directory.GetCurrentDirectory();
-            var path = Path.Combine(current, "Files", $"{caff.FilePathWithoutExtension}.caff");
-            return PhysicalFile(path, "application/caff", $"{caff.Name}.caff");
         }
 
         // GET api/caffs/{id}/preview
         [HttpGet("{id}/preview")]
         public ActionResult Preview(string id)
         {
-            var caff = context.Caffs.Where(c => c.IsActive)
+            try
+            {
+                var caff = context.Caffs.Where(c => c.IsActive)
                                     .Include(c => c.Uploader)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(id));
-            if (caff == null)
+                if (caff == null)
+                {
+                    return NotFound($"No CAFF file was found with the id {id}!");
+                }
+                var current = Directory.GetCurrentDirectory();
+                var path = Path.Combine(current, "Previews", $"{caff.FilePathWithoutExtension}.gif");
+                return PhysicalFile(path, "application/gif", $"{(caff.Name)}.gif");
+            }
+            catch (Exception)
             {
                 return NotFound($"No CAFF file was found with the id {id}!");
             }
-            var current = Directory.GetCurrentDirectory();
-            var path = Path.Combine(current, "Previews", $"{caff.FilePathWithoutExtension}.gif");
-            return PhysicalFile(path, "application/gif", $"{(caff.Name)}.gif");
         }
 
         // POST api/caffs
@@ -124,30 +145,44 @@ namespace Backend.Controllers
         [HttpPatch("{id}")]
         public ActionResult Patch(string id, [FromBody] string name)
         {
-            var caff = context.Caffs.Where(c => c.IsActive)
+            try
+            {
+                var caff = context.Caffs.Where(c => c.IsActive)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(id));
-            if (caff == null)
+                if (caff == null)
+                {
+                    return NotFound($"No CAFF file was found with the id {id}!");
+                }
+                caff.Name = name;
+                context.SaveChanges();
+                return NoContent();
+            }
+            catch (Exception)
             {
                 return NotFound($"No CAFF file was found with the id {id}!");
             }
-            caff.Name = name;
-            context.SaveChanges();
-            return NoContent();
         }
 
         // DELETE api/caffs/{id}
         [HttpDelete("{id}")]
         public ActionResult Delete(string id)
         {
-            var caff = context.Caffs.Where(c => c.IsActive)
+            try
+            {
+                var caff = context.Caffs.Where(c => c.IsActive)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(id));
-            if (caff == null)
+                if (caff == null)
+                {
+                    return NotFound($"No CAFF file was found with the id {id}!");
+                }
+                caff.IsActive = false;
+                context.SaveChanges();
+                return NoContent();
+            }
+            catch (Exception)
             {
                 return NotFound($"No CAFF file was found with the id {id}!");
             }
-            caff.IsActive = false;
-            context.SaveChanges();
-            return NoContent();
         }
     }
 }

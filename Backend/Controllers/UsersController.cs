@@ -31,13 +31,20 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public ActionResult<UserDTO> Get(string id)
         {
-            var user = context.Users.Where(u => u.IsActive)
+            try
+            {
+                var user = context.Users.Where(u => u.IsActive)
                                     .FirstOrDefault(u => u.Id == Mapper.GetUserId(id));
-            if (user == null)
+                if (user == null)
+                {
+                    return NotFound($"No User was found with the id {id}!");
+                }
+                return Mapper.ToUserDTO(user);
+            }
+            catch (Exception)
             {
                 return NotFound($"No User was found with the id {id}!");
             }
-            return Mapper.ToUserDTO(user);
         }
 
         // POST api/users
@@ -58,15 +65,23 @@ namespace Backend.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete(string id)
         {
-            var user = context.Users.Where(u => u.IsActive)
+            try
+            {
+                var user = context.Users.Where(u => u.IsActive)
                                     .FirstOrDefault(u => u.Id == Mapper.GetUserId(id));
-            if (user == null)
+                if (user == null)
+                {
+                    return NotFound($"No User was found with the id {id}!");
+                }
+                user.IsActive = false;
+                context.SaveChanges();
+                return NoContent();
+            }
+            catch (Exception)
             {
                 return NotFound($"No User was found with the id {id}!");
             }
-            user.IsActive = false;
-            context.SaveChanges();
-            return NoContent();
+            
         }
     }
 }

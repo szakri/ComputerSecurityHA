@@ -32,14 +32,21 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public ActionResult<CommentDTO> Get(string id)
         {
-            var comment = context.Comments.Include(c => c.User)
+            try
+            {
+                var comment = context.Comments.Include(c => c.User)
                                           .Where(c => c.IsActive)
                                           .FirstOrDefault(c => c.Id == Mapper.GetCommentId(id));
-            if (comment == null)
+                if (comment == null)
+                {
+                    return NotFound($"No Comment was found with the id {id}!");
+                }
+                return Ok(Mapper.ToCommentDTO(comment));
+            }
+            catch (Exception)
             {
                 return NotFound($"No Comment was found with the id {id}!");
             }
-            return Ok(Mapper.ToCommentDTO(comment));
         }
 
         // POST api/comments
@@ -79,30 +86,44 @@ namespace Backend.Controllers
         [HttpPatch("{id}")]
         public ActionResult Patch(string id, [FromBody] string text)
         {
-            var comment = context.Comments.Where(c => c.IsActive)
+            try
+            {
+                var comment = context.Comments.Where(c => c.IsActive)
                                           .FirstOrDefault(c => c.Id == Mapper.GetCommentId(id));
-            if (comment == null)
+                if (comment == null)
+                {
+                    return NotFound($"No Comment was found with the id {id}!");
+                }
+                comment.Text = text;
+                context.SaveChanges();
+                return NoContent();
+            }
+            catch (Exception)
             {
                 return NotFound($"No Comment was found with the id {id}!");
             }
-            comment.Text = text;
-            context.SaveChanges();
-            return NoContent();
         }
 
         // DELETE api/comments/{id}
         [HttpDelete("{id}")]
         public ActionResult Delete(string id)
         {
-            var comment = context.Comments.Where(c => c.IsActive)
+            try
+            {
+                var comment = context.Comments.Where(c => c.IsActive)
                                           .FirstOrDefault(c => c.Id == Mapper.GetCommentId(id));
-            if (comment == null)
+                if (comment == null)
+                {
+                    return NotFound($"No Comment was found with the id {id}!");
+                }
+                comment.IsActive = false;
+                context.SaveChanges();
+                return NoContent();
+            }
+            catch (Exception)
             {
                 return NotFound($"No Comment was found with the id {id}!");
             }
-            comment.IsActive = false;
-            context.SaveChanges();
-            return NoContent();
         }
     }
 }

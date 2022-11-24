@@ -1,8 +1,12 @@
-﻿namespace Models
+﻿using System.Text.Json.Serialization;
+
+namespace Models
 {
     public class UserDTO
     {
+        [JsonPropertyName("id")]
         public string Id { get; set; }
-        public string UserName { get; set; }
+        [JsonPropertyName("username")]
+        public string Username { get; set; }
     }
 }

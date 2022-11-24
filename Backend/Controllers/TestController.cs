@@ -1,5 +1,6 @@
 ﻿using DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
@@ -71,6 +72,15 @@ namespace Backend.Controllers
             };
             context.AddRange(caffs);
 
+            context.SaveChanges();
+        }
+
+        [HttpGet("reset")]
+        public void Reset()
+        {
+            context.Caffs.RemoveRange(context.Caffs.ToArray());
+            context.Comments.RemoveRange(context.Comments.ToArray());
+            context.Users.RemoveRange(context.Users.ToArray());
             context.SaveChanges();
         }
     }

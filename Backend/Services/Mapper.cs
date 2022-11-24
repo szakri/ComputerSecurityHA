@@ -51,7 +51,7 @@ namespace Backend.Services
             return new UserDTO
             {
                 Id = userHasher.Encode(user.Id),
-                UserName = user.Username,
+                Username = user.Username,
             };
         }
 
