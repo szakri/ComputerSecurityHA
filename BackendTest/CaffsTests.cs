@@ -1,22 +1,23 @@
 ﻿using Backend;
 using Models;
 using System.Net;
-using System.Text;
+using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Web;
 
 namespace BackendTest
 {
-    public class UsersTests
+    public class CaffsTests
     {
         private readonly HttpClient _client;
 
-        public UsersTests(InMemoryDbFactory<Program> factory)
+        public CaffsTests(InMemoryDbFactory<Program> factory)
         {
             _client = factory.CreateClient();
         }
 
         [Fact]
-        public void Get_ReturnsAllUsers()
+        public void Get_ReturnsAllCaffs()
         {
             lock (Utility.Lock)
             {
@@ -42,21 +43,30 @@ namespace BackendTest
                     Id = Utility.AddUser(_client, register2).Result.Id,
                     Username = register2.Username
                 };
+                var caff1 = Utility.AddCaff(_client, user1).Result;
+                var caff2 = Utility.AddCaff(_client, user2).Result;
 
                 // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}").Result;
+                var response = _client.GetAsync($"{Utility.CaffsUrl}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
-                var users = JsonSerializer.Deserialize<List<UserDTO>>(content);
+                var caffs = JsonSerializer.Deserialize<List<CaffDTO>>(content);
 
                 // Assert
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(users);
-                Assert.Collection(users, user => Utility.CompareUserDTOs(user, user1), user => Utility.CompareUserDTOs(user, user2));
+                Assert.NotNull(caffs);
+                Assert.Collection(caffs, caff => Utility.CompareCaffDTOs(caff, caff1), caff => Utility.CompareCaffDTOs(caff, caff2));
             }
         }
 
+        [Theory]
+        [InlineData("")]
+        public void Get_ReturnsAllFilteredCaffs(string searchBy)
+        {
+            // TODO
+        }
+
         [Fact]
-        public void Get_RetrunsCorrectUser()
+        public void Get_RetrunsCorrectCaff()
         {
             lock (Utility.Lock)
             {
@@ -67,23 +77,28 @@ namespace BackendTest
                     Username = "test",
                     Password = "test"
                 };
-                var registeredUser = Utility.AddUser(_client, register).Result;
+                var uploader = new UserDTO
+                {
+                    Id = Utility.AddUser(_client, register).Result.Id,
+                    Username = register.Username
+                };
+                var upload = Utility.AddCaff(_client, uploader).Result;
 
                 // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}/{registeredUser.Id}").Result;
+                var response = _client.GetAsync($"{Utility.CaffsUrl}/{upload.Id}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
-                var user = JsonSerializer.Deserialize<UserDTO>(content);
+                var caff = JsonSerializer.Deserialize<CaffDTO>(content);
 
                 // Assert
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(user);
-                Assert.True(Utility.CompareUserDTOs(registeredUser, user));
+                Assert.NotNull(caff);
+                Assert.True(Utility.CompareCaffDTOs(upload, caff));
             }
         }
 
         [Theory]
         [InlineData("1")]
-        public void Get_RetrunsWithBadRequest(string userId)
+        public void Get_RetrunsWithBadRequest(string caffId)
         {
             lock (Utility.Lock)
             {
@@ -91,12 +106,12 @@ namespace BackendTest
                 Utility.ResetDB(_client).Wait();
 
                 // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}/{userId}").Result;
+                var response = _client.GetAsync($"{Utility.CaffsUrl}/{caffId}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No User was found with the id {userId}!", content);
+                Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
             }
         }
 
@@ -107,22 +122,33 @@ namespace BackendTest
             {
                 // Arrange
                 Utility.ResetDB(_client).Wait();
-                var register = new RegisterDTO
+                var current = Directory.GetCurrentDirectory();
+                var filePath = Path.Combine(current, "Resources", "test.caff");
+                UriBuilder builder = new(Utility.CaffsUrl);
+                var user = Utility.AddUser(_client, new RegisterDTO
                 {
                     Username = "test",
                     Password = "test"
-                };
+                }).Result;
+                var query = HttpUtility.ParseQueryString(builder.Query);
+                query["userId"] = user.Id;
+                builder.Query = query.ToString();
+                var fileStreamContent = new StreamContent(File.OpenRead(filePath));
+                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/caff");
+                var multipartFormContent = new MultipartFormDataContent();
+                multipartFormContent.Add(fileStreamContent, name: "file", fileName: "test.caff");
 
                 // Act
-                var response = _client.PostAsync(Utility.UsersUrl,
-                    new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+                var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
                 var content = response.Content.ReadAsStringAsync().Result;
-                var user = JsonSerializer.Deserialize<UserDTO>(content);
+                var caff = JsonSerializer.Deserialize<CaffDTO>(content);
 
                 // Assert
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                Assert.NotNull(user);
-                Assert.Equal("test", user.Username);
+                Assert.NotNull(caff);
+                Assert.Equal("test", caff.Name);
+                Assert.Equal("test", caff.UploaderUsername);
+                Assert.Empty(caff.Comments);
             }
         }
 
@@ -138,24 +164,29 @@ namespace BackendTest
                     Username = "test",
                     Password = "test"
                 };
-                var userId = Utility.AddUser(_client, register).Result.Id;
+                var uploader = new UserDTO
+                {
+                    Id = Utility.AddUser(_client, register).Result.Id,
+                    Username = register.Username
+                };
+                var caffId = Utility.AddCaff(_client, uploader).Result.Id;
 
                 // Act
-                var response = _client.DeleteAsync($"{Utility.UsersUrl}/{userId}").Result;
+                var response = _client.DeleteAsync($"{Utility.CaffsUrl}/{caffId}").Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-                response = _client.GetAsync($"{Utility.UsersUrl}").Result;
+                response = _client.GetAsync($"{Utility.CaffsUrl}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
-                var users = JsonSerializer.Deserialize<List<UserDTO>>(content);
-                Assert.NotNull(users);
-                Assert.Empty(users);
+                var caffs = JsonSerializer.Deserialize<List<UserDTO>>(content);
+                Assert.NotNull(caffs);
+                Assert.Empty(caffs);
             }
         }
 
         [Theory]
         [InlineData("1")]
-        public void Delete_RetrunsWithBadRequest(string userId)
+        public void Delete_RetrunsWithBadRequest(string caffId)
         {
             lock (Utility.Lock)
             {
@@ -163,12 +194,12 @@ namespace BackendTest
                 Utility.ResetDB(_client).Wait();
 
                 // Act
-                var response = _client.DeleteAsync($"{Utility.UsersUrl}/{userId}").Result;
+                var response = _client.DeleteAsync($"{Utility.CaffsUrl}/{caffId}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No User was found with the id {userId}!", content);
+                Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
             }
         }
     }

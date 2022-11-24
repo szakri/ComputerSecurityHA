@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using System.Linq;
 using System.Linq.Dynamic.Core;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -132,7 +131,7 @@ namespace Backend.Controllers
             var filePath = FileManager.SaveFile(file, user);
             var caff = new Caff
             {
-                Name = file.FileName,
+                Name = Path.GetFileNameWithoutExtension(file.FileName),
                 FilePathWithoutExtension = filePath,
                 Uploader = user
             };

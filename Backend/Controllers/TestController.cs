@@ -1,6 +1,5 @@
 ﻿using DAL;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
@@ -78,7 +77,14 @@ namespace Backend.Controllers
         [HttpGet("reset")]
         public void Reset()
         {
-            context.Caffs.RemoveRange(context.Caffs.ToArray());
+            var current = Directory.GetCurrentDirectory();
+            var caffs = context.Caffs.ToArray();
+            foreach (var caff in caffs)
+            {
+                System.IO.File.Delete(Path.Combine(current, "Files", $"{caff.FilePathWithoutExtension}.caff"));
+                System.IO.File.Delete(Path.Combine(current, "Previews", $"{caff.FilePathWithoutExtension}.gif"));
+            }
+            context.Caffs.RemoveRange(caffs);
             context.Comments.RemoveRange(context.Comments.ToArray());
             context.Users.RemoveRange(context.Users.ToArray());
             context.SaveChanges();
