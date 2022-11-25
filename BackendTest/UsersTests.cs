@@ -122,7 +122,7 @@ namespace BackendTest
                 // Assert
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                 Assert.NotNull(user);
-                Assert.Equal("test", user.Username);
+                Assert.Equal(register.Username, user.Username);
             }
         }
 

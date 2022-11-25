@@ -2,6 +2,7 @@
 using Models;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Web;
 
@@ -125,18 +126,20 @@ namespace BackendTest
                 var current = Directory.GetCurrentDirectory();
                 var filePath = Path.Combine(current, "Resources", "test.caff");
                 UriBuilder builder = new(Utility.CaffsUrl);
-                var user = Utility.AddUser(_client, new RegisterDTO
+                var register = new RegisterDTO
                 {
                     Username = "test",
                     Password = "test"
-                }).Result;
+                };
+                var user = Utility.AddUser(_client, register).Result;
                 var query = HttpUtility.ParseQueryString(builder.Query);
                 query["userId"] = user.Id;
                 builder.Query = query.ToString();
                 var fileStreamContent = new StreamContent(File.OpenRead(filePath));
                 fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/caff");
                 var multipartFormContent = new MultipartFormDataContent();
-                multipartFormContent.Add(fileStreamContent, name: "file", fileName: "test.caff");
+                var fileName = "test";
+                multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
 
                 // Act
                 var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
@@ -146,8 +149,8 @@ namespace BackendTest
                 // Assert
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                 Assert.NotNull(caff);
-                Assert.Equal("test", caff.Name);
-                Assert.Equal("test", caff.UploaderUsername);
+                Assert.Equal(fileName, caff.Name);
+                Assert.Equal(register.Username, caff.UploaderUsername);
                 Assert.Empty(caff.Comments);
             }
         }
@@ -201,10 +204,10 @@ namespace BackendTest
                     Id = Utility.AddUser(_client, register).Result.Id,
                     Username = register.Username
                 };
-                var caffId = Utility.AddCaff(_client, uploader).Result.Id;
+                var caff = Utility.AddCaff(_client, uploader).Result;
 
                 // Act
-                var response = _client.DeleteAsync($"{Utility.CaffsUrl}/{caffId}").Result;
+                var response = _client.DeleteAsync($"{Utility.CaffsUrl}/{caff.Id}").Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
