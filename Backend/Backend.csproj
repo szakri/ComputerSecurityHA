@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Hashids.net" Version="1.6.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="6.2.23" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.11" />
