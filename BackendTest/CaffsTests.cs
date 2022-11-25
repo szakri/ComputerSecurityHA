@@ -153,6 +153,38 @@ namespace BackendTest
         }
 
         [Fact]
+        public void Patch_ModifiesSuccessfully()
+        {
+            lock (Utility.Lock)
+            {
+                // Arrange
+                Utility.ResetDB(_client).Wait();
+                var user = Utility.AddUser(_client, new RegisterDTO
+                {
+                    Username = "test",
+                    Password = "test"
+                }).Result;
+                var caff = Utility.AddCaff(_client, user).Result;
+                var newName = "patch";
+
+                // Act
+                var response = _client.PatchAsync($"{Utility.CaffsUrl}/{caff.Id}",
+                    new StringContent(JsonSerializer.Serialize(newName), Encoding.UTF8, "application/json")).Result;
+                var content = response.Content.ReadAsStringAsync().Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+                var modified = Utility.GetCaff(_client, caff.Id).Result;
+                Assert.NotNull(modified);
+                Assert.Equal(caff.Id, modified.Id);
+                Assert.Equal(newName, modified.Name);
+                Assert.Equal(caff.UploaderId, modified.UploaderId);
+                Assert.Equal(caff.UploaderUsername, modified.UploaderUsername);
+                Assert.Empty(modified.Comments);
+            }
+        }
+
+        [Fact]
         public void Delete_RemovesUser()
         {
             lock (Utility.Lock)
