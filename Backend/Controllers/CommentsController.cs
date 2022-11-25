@@ -51,24 +51,24 @@ namespace Backend.Controllers
 
         // POST api/comments
         [HttpPost]
-        public ActionResult<CommentDTO> Post(string caffId, string userId, string text)
+        public ActionResult<CommentDTO> Post([FromBody] NewCommentDTO newComment)
         {
             var caff = context.Caffs.Where(c => c.IsActive)
-                                    .FirstOrDefault(c => c.Id == Mapper.GetCaffId(caffId));
+                                    .FirstOrDefault(c => c.Id == Mapper.GetCaffId(newComment.CaffId));
             if (caff == null)
             {
-                return NotFound($"No CAFF file was found with the id {caffId}!");
+                return NotFound($"No CAFF file was found with the id {newComment.CaffId}!");
             }
             var user = context.Users.Where(u => u.IsActive)
-                                    .FirstOrDefault(u => u.Id == Mapper.GetUserId(userId));
+                                    .FirstOrDefault(u => u.Id == Mapper.GetUserId(newComment.UserId));
             if (user == null)
             {
-                return NotFound($"No User was found with the id {userId}!");
+                return NotFound($"No User was found with the id {newComment.UserId}!");
             }
             var comment = new Comment
             {
                 User = user,
-                Text = text
+                Text = newComment.CommentText
             };
             if (caff.Comments == null)
             {
@@ -79,7 +79,7 @@ namespace Backend.Controllers
                 caff.Comments.Add(comment);
             }
             context.SaveChanges();
-            return CreatedAtAction("Get", new { id = Mapper.GetCommentHash(comment.Id) }, comment);
+            return CreatedAtAction("Get", new { id = Mapper.GetCommentHash(comment.Id) }, Mapper.ToCommentDTO(comment));
         }
 
         // PATCH api/comments/{id}

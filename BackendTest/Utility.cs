@@ -10,6 +10,7 @@ namespace BackendTest
     {
         public static readonly string UsersUrl = "https://localhost:7206/api/Users";
         public static readonly string CaffsUrl = "https://localhost:7206/api/Caffs";
+        public static readonly string CommentsUrl = "https://localhost:7206/api/Comments";
         public static readonly object Lock = new();
 
         internal static async Task ResetDB(HttpClient client)
@@ -40,6 +41,20 @@ namespace BackendTest
             var response = await client.PostAsync(builder.ToString(), multipartFormContent);
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<CaffDTO>(content);
+        }
+
+        internal static async Task<CommentDTO> AddComment(HttpClient client, UserDTO user, CaffDTO caff, string commentText)
+        {
+            var newComment = new NewCommentDTO()
+            {
+                CaffId = caff.Id,
+                UserId = user.Id,
+                CommentText = commentText
+            };
+            var response = await client.PostAsync(Utility.CommentsUrl,
+                new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json"));
+            var content = response.Content.ReadAsStringAsync().Result;
+            return JsonSerializer.Deserialize<CommentDTO>(content);
         }
 
         internal static bool CompareUserDTOs(UserDTO user1, UserDTO user2)
@@ -83,6 +98,20 @@ namespace BackendTest
             return comment1.Id == comment2.Id &&
                    comment1.Text == comment2.Text &&
                    CompareUserDTOs(comment1.User, comment2.User);
+        }
+
+        internal static async Task<CaffDTO> GetCaff(HttpClient client, string id)
+        {
+            var response = await client.GetAsync($"{CaffsUrl}/{id}");
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<CaffDTO>(content);
+        }
+
+        internal static async Task<CommentDTO> GetComment(HttpClient client, string id)
+        {
+            var response = await client.GetAsync($"{CommentsUrl}/{id}");
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<CommentDTO>(content);
         }
     }
 }
