@@ -136,7 +136,7 @@ namespace Backend.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("admionauthorized")]
+        [HttpGet("adminauthorized")]
         public ActionResult AdminAuthorized()
         {
             return Ok("Authorized");
