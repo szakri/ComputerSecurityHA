@@ -42,7 +42,7 @@ namespace Backend.Controllers
                 },
                 new User
                 {
-                    Username = "Teszt Elek",
+                    Username = "TesztElek",
                     Password = "test1234"
                 }
             };

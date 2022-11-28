@@ -1,8 +1,12 @@
-﻿using Models;
+﻿using Microsoft.Win32;
+using Models;
+using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using Xunit.Sdk;
 
 namespace BackendTest
 {
@@ -12,6 +16,21 @@ namespace BackendTest
         public static readonly string CaffsUrl = "https://localhost:7206/api/Caffs";
         public static readonly string CommentsUrl = "https://localhost:7206/api/Comments";
         public static readonly object Lock = new();
+
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+        public class BeforeAfter : BeforeAfterTestAttribute
+        {
+
+            public override void Before(MethodInfo methodUnderTest)
+            {
+                Monitor.Enter(Lock);
+            }
+
+            public override void After(MethodInfo methodUnderTest)
+            {
+                Monitor.Exit(Lock);
+            }
+        }
 
         internal static async Task ResetDB(HttpClient client)
         {
@@ -26,7 +45,7 @@ namespace BackendTest
             return JsonSerializer.Deserialize<UserDTO>(content);
         }
 
-        internal static async Task<CaffDTO> AddCaff(HttpClient client, UserDTO uploader)
+        internal static async Task<CaffDTO> AddCaff(HttpClient client, UserDTO uploader, string fileName = "test")
         {
             var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
@@ -37,7 +56,7 @@ namespace BackendTest
             var fileStreamContent = new StreamContent(File.OpenRead(filePath));
             fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue("image/caff");
             var multipartFormContent = new MultipartFormDataContent();
-            multipartFormContent.Add(fileStreamContent, name: "file", fileName: "test.caff");
+            multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
             var response = await client.PostAsync(builder.ToString(), multipartFormContent);
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<CaffDTO>(content);
@@ -112,6 +131,20 @@ namespace BackendTest
             var response = await client.GetAsync($"{CommentsUrl}/{id}");
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<CommentDTO>(content);
+        }
+
+        internal static async Task Login(HttpClient client, RegisterDTO user)
+        {
+            UriBuilder builder = new("https://localhost:7206/api/test/login");
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            query["username"] = user.Username;
+            query["password"] = user.Password;
+            builder.Query = query.ToString();
+            var response = await client.GetAsync(builder.ToString());
+            var token = await response.Content.ReadAsStringAsync();
+
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
         }
     }
 }

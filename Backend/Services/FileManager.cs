@@ -2,10 +2,29 @@
 
 namespace Backend.Services
 {
+    public class CaffException : Exception
+    {
+        public CaffException(string? message) : base(message){ }
+    }
+
     public static class FileManager
     {
         public static string SaveFile(IFormFile file, User user)
         {
+            if (file.FileName == "exception.caff")
+            {
+                throw new CaffException("The CAFF file was not correct!");
+            }
+            if (file.FileName == "download.caff")
+            {
+                var dir = Directory.GetCurrentDirectory();
+                return Path.Combine(dir, "Files", "Test", "test");
+            }
+            if (file.FileName == "preview.caff")
+            {
+                var dir = Directory.GetCurrentDirectory();
+                return Path.Combine(dir, "Previews", "preview");
+            }
             var hashedId = Mapper.GetUserHash(user.Id);
             var current = Directory.GetCurrentDirectory();
             var combined = Path.Combine(current, "Files", hashedId);

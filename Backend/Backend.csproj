@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Files\Test\test.caff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Previews\preview.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Previews\test.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -53,14 +53,35 @@ namespace Backend.Controllers
         [HttpPost]
         public ActionResult<CommentDTO> Post([FromBody] NewCommentDTO newComment)
         {
-            var caff = context.Caffs.Where(c => c.IsActive)
+            if (string.IsNullOrEmpty(newComment.CommentText))
+            {
+                return BadRequest("The commentText must be at least 1 character long!");
+            }
+            Caff? caff = default;
+            try
+            {
+                caff = context.Caffs.Where(c => c.IsActive)
                                     .FirstOrDefault(c => c.Id == Mapper.GetCaffId(newComment.CaffId));
+            }
+            catch (Exception)
+            {
+                return NotFound($"No CAFF file was found with the id {newComment.CaffId}!");
+            }
             if (caff == null)
             {
                 return NotFound($"No CAFF file was found with the id {newComment.CaffId}!");
             }
-            var user = context.Users.Where(u => u.IsActive)
+            User? user = default;
+            try
+            {
+                user = context.Users.Where(u => u.IsActive)
                                     .FirstOrDefault(u => u.Id == Mapper.GetUserId(newComment.UserId));
+            }
+            catch (Exception)
+            {
+                return NotFound($"No User was found with the id {newComment.UserId}!");
+            }
+            
             if (user == null)
             {
                 return NotFound($"No User was found with the id {newComment.UserId}!");
@@ -84,8 +105,12 @@ namespace Backend.Controllers
 
         // PATCH api/comments/{id}
         [HttpPatch("{id}")]
-        public ActionResult Patch(string id, [FromBody] string text)
+        public ActionResult Patch(string id, [FromBody] string commentText)
         {
+            if (string.IsNullOrEmpty(commentText))
+            {
+                return BadRequest("The commentText must be at least 1 character long!");
+            }
             try
             {
                 var comment = context.Comments.Where(c => c.IsActive)
@@ -94,7 +119,7 @@ namespace Backend.Controllers
                 {
                     return NotFound($"No Comment was found with the id {id}!");
                 }
-                comment.Text = text;
+                comment.Text = commentText;
                 context.SaveChanges();
                 return NoContent();
             }

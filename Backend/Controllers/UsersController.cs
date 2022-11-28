@@ -51,6 +51,22 @@ namespace Backend.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] RegisterDTO user)
         {
+            if (string.IsNullOrWhiteSpace(user.Username))
+            {
+                return BadRequest("The Username must not be empty!");
+            }
+            if (string.IsNullOrWhiteSpace(user.Password))
+            {
+                return BadRequest("The Password must not be empty!");
+            }
+            if (user.Username.Any(x => char.IsWhiteSpace(x)))
+            {
+                return BadRequest("The Username must not contain whitespaces!");
+            }
+            if (context.Users.Any(u => u.Username == user.Username))
+            {
+                return BadRequest("The Username is already in use!");
+            }
             var newUser = new User
             {
                 Username = user.Username,

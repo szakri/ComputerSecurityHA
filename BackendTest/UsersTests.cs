@@ -1,8 +1,13 @@
 ﻿using Backend;
 using Models;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Web;
+using static BackendTest.Utility;
+using System.Net.Http.Json;
 
 namespace BackendTest
 {
@@ -15,161 +20,227 @@ namespace BackendTest
             _client = factory.CreateClient();
         }
 
+        [BeforeAfter]
         [Fact]
         public void Get_ReturnsAllUsers()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register1 = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register1 = new RegisterDTO
-                {
-                    Username = "test1",
-                    Password = "test1"
-                };
-                var register2 = new RegisterDTO
-                {
-                    Username = "test2",
-                    Password = "test2"
-                };
-                var user1 = new UserDTO
-                {
-                    Id = Utility.AddUser(_client, register1).Result.Id,
-                    Username = register1.Username
-                };
-                var user2 = new UserDTO
-                {
-                    Id = Utility.AddUser(_client, register2).Result.Id,
-                    Username = register2.Username
-                };
+                Username = "test1",
+                Password = "test1"
+            };
+            var register2 = new RegisterDTO
+            {
+                Username = "test2",
+                Password = "test2"
+            };
+            var user1 = AddUser(_client, register1).Result;
+            var user2 = AddUser(_client, register2).Result;
 
-                // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var users = JsonSerializer.Deserialize<List<UserDTO>>(content);
+            // Act
+            var response = _client.GetAsync(UsersUrl).Result;
+            var users = response.Content.ReadFromJsonAsync<List<UserDTO>>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(users);
-                Assert.Collection(users, user => Utility.CompareUserDTOs(user, user1), user => Utility.CompareUserDTOs(user, user2));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(users);
+            Assert.Collection(users, user => CompareUserDTOs(user, user1), user => CompareUserDTOs(user, user2));
         }
 
+        [BeforeAfter]
         [Fact]
         public void Get_RetrunsCorrectUser()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register = new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                };
-                var registeredUser = Utility.AddUser(_client, register).Result;
+                Username = "test",
+                Password = "test"
+            };
+            var registeredUser = AddUser(_client, register).Result;
 
-                // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}/{registeredUser.Id}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var user = JsonSerializer.Deserialize<UserDTO>(content);
+            // Act
+            var response = _client.GetAsync($"{UsersUrl}/{registeredUser.Id}").Result;
+            var user = response.Content.ReadFromJsonAsync<UserDTO>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(user);
-                Assert.True(Utility.CompareUserDTOs(registeredUser, user));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(user);
+            Assert.True(CompareUserDTOs(registeredUser, user));
         }
 
+        [BeforeAfter]
         [Theory]
         [InlineData("1")]
         public void Get_RetrunsWithBadRequest(string userId)
         {
-            lock (Utility.Lock)
-            {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
+            // Arrange
+            ResetDB(_client).Wait();
 
-                // Act
-                var response = _client.GetAsync($"{Utility.UsersUrl}/{userId}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            // Act
+            var response = _client.GetAsync($"{UsersUrl}/{userId}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No User was found with the id {userId}!", content);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No User was found with the id {userId}!", content);
         }
 
+        [BeforeAfter]
         [Fact]
         public void Post_CreatesSuccessfully()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register = new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                };
+                Username = "test",
+                Password = "test"
+            };
 
-                // Act
-                var response = _client.PostAsync(Utility.UsersUrl,
-                    new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var user = JsonSerializer.Deserialize<UserDTO>(content);
+            // Act
+            var response = _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+            var user = response.Content.ReadFromJsonAsync<UserDTO>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                Assert.NotNull(user);
-                Assert.Equal(register.Username, user.Username);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.NotNull(user);
+            Assert.Equal(register.Username, user.Username);
         }
 
+        [BeforeAfter]
+        [Fact]
+        public void Post_RetrunsWithBadRequestWithEmptyUsername()
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
+            {
+                Username = "",
+                Password = "test"
+            };
+
+            // Act
+            var response = _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The Username must not be empty!", content);
+        }
+
+        [BeforeAfter]
+        [Fact]
+        public void Post_RetrunsWithBadRequestWithEmptyPassword()
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
+            {
+                Username = "test",
+                Password = ""
+            };
+
+            // Act
+            var response = _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The Password must not be empty!", content);
+        }
+
+        [BeforeAfter]
+        [Fact]
+        public void Post_RetrunsWithBadRequestWithUsernameWithWhiteSpace()
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
+            {
+                Username = "test test",
+                Password = "test"
+            };
+
+            // Act
+            var response = _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The Username must not contain whitespaces!", content);
+        }
+
+        [BeforeAfter]
+        [Fact]
+        public void Post_RetrunsWithBadRequestWithExsitsingUsername()
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
+            {
+                Username = "test",
+                Password = "test"
+            };
+            _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Wait();
+
+            // Act
+            var response = _client.PostAsync(UsersUrl,
+                new StringContent(JsonSerializer.Serialize(register), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The Username is already in use!", content);
+        }
+
+        [BeforeAfter]
         [Fact]
         public void Delete_RemovesUser()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register = new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                };
-                var userId = Utility.AddUser(_client, register).Result.Id;
+                Username = "test",
+                Password = "test"
+            };
+            var userId = AddUser(_client, register).Result.Id;
 
-                // Act
-                var response = _client.DeleteAsync($"{Utility.UsersUrl}/{userId}").Result;
+            // Act
+            var response = _client.DeleteAsync($"{UsersUrl}/{userId}").Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-                response = _client.GetAsync($"{Utility.UsersUrl}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var users = JsonSerializer.Deserialize<List<UserDTO>>(content);
-                Assert.NotNull(users);
-                Assert.Empty(users);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            response = _client.GetAsync(UsersUrl).Result;
+            var users = response.Content.ReadFromJsonAsync<List<UserDTO>>().Result;
+            Assert.NotNull(users);
+            Assert.Empty(users);
         }
 
+        [BeforeAfter]
         [Theory]
         [InlineData("1")]
         public void Delete_RetrunsWithBadRequest(string userId)
         {
-            lock (Utility.Lock)
-            {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
+            // Arrange
+            ResetDB(_client).Wait();
 
-                // Act
-                var response = _client.DeleteAsync($"{Utility.UsersUrl}/{userId}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            // Act
+            var response = _client.DeleteAsync($"{UsersUrl}/{userId}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No User was found with the id {userId}!", content);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No User was found with the id {userId}!", content);
         }
     }
 }

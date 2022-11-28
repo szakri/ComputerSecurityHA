@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core.Exceptions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -33,11 +34,18 @@ namespace Backend.Controllers
                                        .Where(c => c.IsActive)
                                        .Select(c => Mapper.ToCaffDTO(c)));
             }
-            return Ok(context.Caffs.Include(c => c.Uploader)
+            try
+            {
+                return Ok(context.Caffs.Include(c => c.Uploader)
                                    .Include(c => c.Comments)
                                    .ThenInclude(c => c.User)
-                                   .Where($"c => c.IsActive && {searchBy}")
+                                   .Where($"IsActive == true && {searchBy}")
                                    .Select(c => Mapper.ToCaffDTO(c)));
+            }
+            catch (ParseException)
+            {
+                return BadRequest("Invalid searchBy term!");
+            }
         }
 
         // GET api/caffs/{id}
@@ -122,28 +130,48 @@ namespace Backend.Controllers
             {
                 return BadRequest("Bad file extension!");
             }
-            var user = context.Users.Where(u => u.IsActive)
+            User? user = default;
+            try
+            {
+                user = context.Users.Where(u => u.IsActive)
                                     .FirstOrDefault(u => u.Id == Mapper.GetUserId(userId));
+            }
+            catch (Exception)
+            {
+                return NotFound($"No User was found with the id {userId}!");
+            }
             if (user == null)
             {
                 return NotFound($"No User was found with the id {userId}!");
             }
-            var filePath = FileManager.SaveFile(file, user);
-            var caff = new Caff
+            try
             {
-                Name = Path.GetFileNameWithoutExtension(file.FileName),
-                FilePathWithoutExtension = filePath,
-                Uploader = user
-            };
-            context.Add(caff);
-            context.SaveChanges();
-            return CreatedAtAction("Get", new { id = Mapper.GetCaffHash(caff.Id) }, Mapper.ToCaffDTO(caff));
+                var filePath = FileManager.SaveFile(file, user);
+                var caff = new Caff
+                {
+                    Name = Path.GetFileNameWithoutExtension(file.FileName),
+                    FilePathWithoutExtension = filePath,
+                    Uploader = user
+                };
+                context.Add(caff);
+                context.SaveChanges();
+                return CreatedAtAction("Get", new { id = Mapper.GetCaffHash(caff.Id) }, Mapper.ToCaffDTO(caff));
+            }
+            catch (CaffException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         // PATCH api/caffs/{id}
         [HttpPatch("{id}")]
         public ActionResult Patch(string id, [FromBody] string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest("The name must be at least 1 character long!");
+            }
             try
             {
                 var caff = context.Caffs.Where(c => c.IsActive)

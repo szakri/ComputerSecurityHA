@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using static BackendTest.Utility;
 
 namespace BackendTest
 {
@@ -22,218 +24,334 @@ namespace BackendTest
             _client = factory.CreateClient();
         }
 
+        [BeforeAfter]
+        [Fact]
+        public void Get_NoCommentsOnInit()
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+
+            // Act
+            var response = _client.GetAsync(CommentsUrl).Result;
+            var comments = response.Content.ReadFromJsonAsync<List<CommentDTO>>().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(comments);
+            Assert.Empty(comments);
+        }
+
+        [BeforeAfter]
         [Fact]
         public void Get_ReturnsAllComments()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register1 = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register1 = new RegisterDTO
-                {
-                    Username = "test1",
-                    Password = "test1"
-                };
-                var register2 = new RegisterDTO
-                {
-                    Username = "test2",
-                    Password = "test2"
-                };
-                var user1 = new UserDTO
-                {
-                    Id = Utility.AddUser(_client, register1).Result.Id,
-                    Username = register1.Username
-                };
-                var user2 = new UserDTO
-                {
-                    Id = Utility.AddUser(_client, register2).Result.Id,
-                    Username = register2.Username
-                };
-                var caff = Utility.AddCaff(_client, user1).Result;
-                var commentText1 = "First";
-                var commentText2 = "Second";
-                var comment1 = Utility.AddComment(_client, user1, caff, commentText1).Result;
-                var comment2 = Utility.AddComment(_client, user2, caff, commentText2).Result;
+                Username = "test1",
+                Password = "test1"
+            };
+            var register2 = new RegisterDTO
+            {
+                Username = "test2",
+                Password = "test2"
+            };
+            var user1 = new UserDTO
+            {
+                Id = AddUser(_client, register1).Result.Id,
+                Username = register1.Username
+            };
+            var user2 = new UserDTO
+            {
+                Id = AddUser(_client, register2).Result.Id,
+                Username = register2.Username
+            };
+            var caff = AddCaff(_client, user1).Result;
+            var commentText1 = "First";
+            var commentText2 = "Second";
+            var comment1 = AddComment(_client, user1, caff, commentText1).Result;
+            var comment2 = AddComment(_client, user2, caff, commentText2).Result;
 
-                // Act
-                var response = _client.GetAsync($"{Utility.CommentsUrl}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var comments = JsonSerializer.Deserialize<List<CommentDTO>>(content);
+            // Act
+            var response = _client.GetAsync(CommentsUrl).Result;
+            var comments = response.Content.ReadFromJsonAsync<List<CommentDTO>>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(comments);
-                Assert.Collection(comments, comment => Utility.CompareCommentDTOs(comment, comment1),
-                    comment => Utility.CompareCommentDTOs(comment, comment2));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(comments);
+            Assert.Collection(comments, comment => CompareCommentDTOs(comment, comment1),
+                comment => CompareCommentDTOs(comment, comment2));
         }
 
+        [BeforeAfter]
         [Fact]
         public void Get_RetrunsCorrectComment()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var register = new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var register = new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                };
-                var user = new UserDTO
-                {
-                    Id = Utility.AddUser(_client, register).Result.Id,
-                    Username = register.Username
-                };
-                var caff = Utility.AddCaff(_client, user).Result;
-                var commentText = "Test comment";
-                var newComment = Utility.AddComment(_client, user, caff, commentText).Result;
+                Username = "test",
+                Password = "test"
+            };
+            var user = new UserDTO
+            {
+                Id = AddUser(_client, register).Result.Id,
+                Username = register.Username
+            };
+            var caff = AddCaff(_client, user).Result;
+            var commentText = "Test comment";
+            var newComment = AddComment(_client, user, caff, commentText).Result;
 
-                // Act
-                var response = _client.GetAsync($"{Utility.CommentsUrl}/{newComment.Id}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var comment = JsonSerializer.Deserialize<CommentDTO>(content);
+            // Act
+            var response = _client.GetAsync($"{CommentsUrl}/{newComment.Id}").Result;
+            var comment = response.Content.ReadFromJsonAsync<CommentDTO>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.NotNull(comment);
-                Assert.True(Utility.CompareCommentDTOs(newComment, comment));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(comment);
+            Assert.True(CompareCommentDTOs(newComment, comment));
         }
 
+        [BeforeAfter]
         [Theory]
         [InlineData("1")]
         public void Get_RetrunsWithBadRequest(string commentId)
         {
-            lock (Utility.Lock)
-            {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
+            // Arrange
+            ResetDB(_client).Wait();
 
-                // Act
-                var response = _client.GetAsync($"{Utility.CommentsUrl}/{commentId}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            // Act
+            var response = _client.GetAsync($"{CommentsUrl}/{commentId}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No Comment was found with the id {commentId}!", content);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No Comment was found with the id {commentId}!", content);
         }
 
+        [BeforeAfter]
         [Fact]
         public void Post_CreatesSuccessfully()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var user = Utility.AddUser(_client, new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                }).Result;
-                var caff = Utility.AddCaff(_client, user).Result;
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
 
-                var commentText = "Test comment";
-                var newComment = new NewCommentDTO()
-                {
-                    CaffId = caff.Id,
-                    UserId = user.Id,
-                    CommentText = commentText
-                };
+            var commentText = "Test comment";
+            var newComment = new NewCommentDTO()
+            {
+                CaffId = caff.Id,
+                UserId = user.Id,
+                CommentText = commentText
+            };
 
-                // Act
-                var response = _client.PostAsync(Utility.CommentsUrl,
-                    new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var comment = JsonSerializer.Deserialize<CommentDTO>(content);
+            // Act
+            var response = _client.PostAsync(CommentsUrl,
+                new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
+            var comment = response.Content.ReadFromJsonAsync<CommentDTO>().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                Assert.NotNull(comment);
-                Assert.Equal(commentText, comment.Text);
-                Assert.True(Utility.CompareUserDTOs(user, comment.User));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.NotNull(comment);
+            Assert.Equal(commentText, comment.Text);
+            Assert.True(CompareUserDTOs(user, comment.User));
         }
 
+        [BeforeAfter]
+        [Theory]
+        [InlineData("1")]
+        public void Post_RetrunsWithNotFoundWithBadCaff(string caffId)
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
+            {
+                Username = "test",
+                Password = "test"
+            }).Result;
+
+            var commentText = "Test comment";
+            var newComment = new NewCommentDTO()
+            {
+                CaffId = caffId,
+                UserId = user.Id,
+                CommentText = commentText
+            };
+
+            // Act
+            var response = _client.PostAsync(CommentsUrl,
+                new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
+        }
+
+        [BeforeAfter]
+        [Theory]
+        [InlineData("1")]
+        public void Post_RetrunsWithNotFoundWithBadUser(string userId)
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
+            {
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
+
+            var commentText = "Test comment";
+            var newComment = new NewCommentDTO()
+            {
+                CaffId = caff.Id,
+                UserId = userId,
+                CommentText = commentText
+            };
+
+            // Act
+            var response = _client.PostAsync(CommentsUrl,
+                new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No User was found with the id {userId}!", content);
+        }
+
+        [BeforeAfter]
+        [Theory]
+        [InlineData("")]
+        public void Post_RetrunsWithBadRequestWithEmptyComment(string commentText)
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
+            {
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
+            var newComment = new NewCommentDTO()
+            {
+                CaffId = caff.Id,
+                UserId = user.Id,
+                CommentText = commentText
+            };
+
+            // Act
+            var response = _client.PostAsync(CommentsUrl,
+                new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The commentText must be at least 1 character long!", content);
+        }
+
+        [BeforeAfter]
         [Fact]
         public void Patch_ModifiesSuccessfully()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var user = Utility.AddUser(_client, new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                }).Result;
-                var caff = Utility.AddCaff(_client, user).Result;
-                var commentText = "Test";
-                var comment = Utility.AddComment(_client, user, caff, commentText).Result;
-                var newCommentText = "patch";
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
+            var commentText = "Test";
+            var comment = AddComment(_client, user, caff, commentText).Result;
+            var newCommentText = "patch";
 
-                // Act
-                var response = _client.PatchAsync($"{Utility.CommentsUrl}/{comment.Id}",
-                    new StringContent(JsonSerializer.Serialize(newCommentText), Encoding.UTF8, "application/json")).Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            // Act
+            var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
+                new StringContent(JsonSerializer.Serialize(newCommentText), Encoding.UTF8, "application/json")).Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-                var modified = Utility.GetComment(_client, comment.Id).Result;
-                Assert.NotNull(modified);
-                Assert.Equal(comment.Id, modified.Id);
-                Assert.Equal(newCommentText, modified.Text);
-                Assert.True(Utility.CompareUserDTOs(user, modified.User));
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            var modified = GetComment(_client, comment.Id).Result;
+            Assert.NotNull(modified);
+            Assert.Equal(comment.Id, modified.Id);
+            Assert.Equal(newCommentText, modified.Text);
+            Assert.True(CompareUserDTOs(user, modified.User));
         }
 
+        [BeforeAfter]
+        [Theory]
+        [InlineData("")]
+        public void Patch_RetrunsWithBadRequestWithEmptyComment(string newCommentText)
+        {
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
+            {
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
+            var comment = AddComment(_client, user, caff, "test").Result;
+
+            // Act
+            var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
+                new StringContent(JsonSerializer.Serialize(newCommentText), Encoding.UTF8, "application/json")).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The commentText must be at least 1 character long!", content);
+        }
+
+        [BeforeAfter]
         [Fact]
         public void Delete_RemovesComment()
         {
-            lock (Utility.Lock)
+            // Arrange
+            ResetDB(_client).Wait();
+            var user = AddUser(_client, new RegisterDTO
             {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
-                var user = Utility.AddUser(_client, new RegisterDTO
-                {
-                    Username = "test",
-                    Password = "test"
-                }).Result;
-                var caff = Utility.AddCaff(_client, user).Result;
-                var commentText = "Test";
-                var comment = Utility.AddComment(_client, user, caff, commentText).Result;
+                Username = "test",
+                Password = "test"
+            }).Result;
+            var caff = AddCaff(_client, user).Result;
+            var commentText = "Test";
+            var comment = AddComment(_client, user, caff, commentText).Result;
 
-                // Act
-                var response = _client.DeleteAsync($"{Utility.CommentsUrl}/{comment.Id}").Result;
+            // Act
+            var response = _client.DeleteAsync($"{CommentsUrl}/{comment.Id}").Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-                response = _client.GetAsync($"{Utility.CommentsUrl}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
-                var comments = JsonSerializer.Deserialize<List<UserDTO>>(content);
-                Assert.NotNull(comments);
-                Assert.Empty(comments);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            response = _client.GetAsync(CommentsUrl).Result;
+            var comments = response.Content.ReadFromJsonAsync<List<UserDTO>>().Result;
+            Assert.NotNull(comments);
+            Assert.Empty(comments);
         }
 
+        [BeforeAfter]
         [Theory]
         [InlineData("1")]
         public void Delete_RetrunsWithBadRequest(string commentId)
         {
-            lock (Utility.Lock)
-            {
-                // Arrange
-                Utility.ResetDB(_client).Wait();
+            // Arrange
+            ResetDB(_client).Wait();
 
-                // Act
-                var response = _client.DeleteAsync($"{Utility.CommentsUrl}/{commentId}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            // Act
+            var response = _client.DeleteAsync($"{CommentsUrl}/{commentId}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.Equal($"No Comment was found with the id {commentId}!", content);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal($"No Comment was found with the id {commentId}!", content);
         }
     }
 }
