@@ -1,0 +1,32 @@
+<div class="auth-container">
+  <mat-card class="container-card">
+    <mat-card-header>
+      <mat-card-title style="margin-bottom:20px;margin-top:20px;">Hello, sign in!</mat-card-title>
+    </mat-card-header>
+    <mat-card-content >
+      <mat-card-actions>
+
+        <mat-form-field>
+          <mat-label>User name</mat-label>
+          <input type="text" matInput [formControl]="userNameFormControl">
+          <mat-error *ngIf="!userNameFormControl.hasError('required')">
+            Please enter a value!
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input type="password" matInput [formControl]="passwordFormControl">
+          <mat-error *ngIf="!passwordFormControl.hasError('required')">
+            Please enter your password!
+          </mat-error>
+        </mat-form-field>
+        <div class="buttons-container">
+          <button mat-raised-button matTooltip="Type your data above and create your account!">Sign up</button>
+          <button mat-raised-button matTooltip="Click to sign in!" color="primary" routerLink="/main">Sign in</button>
+        </div>
+      </mat-card-actions>
+      <mat-card-subtitle style="margin:30px;text-align:center;">The webshop can be accessed only by registered users!</mat-card-subtitle>
+    </mat-card-content>
+    
+  </mat-card>
+</div>

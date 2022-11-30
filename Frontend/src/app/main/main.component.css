@@ -1,0 +1,21 @@
+.container {
+  height: calc(100% - 40px);
+  width: calc(100% - 40px);
+  padding:20px;
+ 
+      
+}
+
+mat-grid-tile {
+  /*background: lightblue;*/
+}
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  //border: solid 1px grey;
+  margin: 10px;
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+}

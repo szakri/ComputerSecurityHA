@@ -1,0 +1,124 @@
+
+
+<div class="details-container" style="display:flex" fxLayout="row" fxLayoutAlign="center stretch" fxLayoutGap="0" fxFlexFill>
+
+
+  <!--BAL OLDAL-->
+  <mat-card class="container-card">
+    <mat-card-content >
+      the animation will be here.
+    </mat-card-content>
+  </mat-card>
+
+
+  <!--JOBB OLDAL-->
+  <mat-card fxLayout="column" fxLayoutAlign="start stretch" style="height:100%;">
+
+   
+
+<!--FELSO KARTYA-->
+      <mat-card class="divider-card">
+        <div style="display: flex; flex-direction: row; align-content: center; justify-content: space-between; align-items: center; margin:20px; margin-bottom:0px;">
+          <mat-card-title>Name of the CAFF file</mat-card-title>
+          <mat-card-title>Price: 0 HUF</mat-card-title>
+        </div>
+        <mat-card-subtitle style="margin:20px; margin-top:0">Uploaded by USERNAME</mat-card-subtitle>
+
+        <div fxLayout="row" fxLayoutAlign="end center">
+          <button mat-raised-button style="margin:20px; margin-top:0;" color="primary">
+            Modify
+          </button>
+          <button mat-raised-button style="margin:20px; margin-top:0;" color="primary">
+            Purchase
+          </button>
+        </div>
+      </mat-card>
+
+
+<!--ALSO KARTYA-->
+      <mat-card class="second-card" >
+        <mat-card-title style="margin:20px; margin-bottom:0;">Comment section</mat-card-title>
+        <div class="comments">
+          <div>
+
+            <!--*ngFor="let comment of comments"-->
+            <!--{{comment.user.username}}: {{comment.text}}-->
+
+            <span>Username:an</span>
+
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <span>Username:</span>
+            <br />
+            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
+            <br /><br />
+            <br /><br />
+
+          </div>
+        </div>
+      </mat-card>
+
+  <!--COMMENT SECTION-->
+      <form class="comment-form">
+     
+
+        <mat-form-field class="example-full-width">
+          <mat-label>Leave a comment</mat-label>
+          <textarea rows="1" matInput placeholder="Ex. It makes me feel..."></textarea>
+        </mat-form-field>
+        <button mat-fab color="primary" (click)="sendComment()">
+          <mat-icon>send</mat-icon>
+        </button></form>
+      
+
+   
+</mat-card>
+
+
+
+
+</div>
