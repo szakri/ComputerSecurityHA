@@ -14,7 +14,7 @@ export class CaffService {
 
   getCaffs(searchby: string | null): Observable<Caff[]> {
     if (searchby) {
-      return this.http.get<Caff[]>(this.baseUrl + "?name=" + searchby);
+      return this.http.get<Caff[]>(this.baseUrl + "?Name=" + "\"" + searchby +"\"" );
     }
     return this.http.get<Caff[]>(this.baseUrl);
   }

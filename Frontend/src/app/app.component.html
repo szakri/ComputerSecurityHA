@@ -1,5 +1,10 @@
+<div *ngIf="this.authService.isLoggedIn()">
+  <app-header></app-header>
+  <div class="container">
+    <router-outlet></router-outlet>
+  </div>
+</div>
 
-<app-header></app-header>
-<div class="container">
-   <router-outlet></router-outlet>
+<div *ngIf="this.authService.isLoggedOut()">
+  You shall not pass!
 </div>

@@ -22,6 +22,7 @@ import { MatFormFieldModule,  } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { AuthService } from './services/authservice';
 
 
 
@@ -51,7 +52,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     FlexLayoutModule,
     MatIconModule,
   ],
-  providers: [],
+  providers: [AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
