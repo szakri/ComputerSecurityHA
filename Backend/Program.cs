@@ -14,6 +14,13 @@ namespace Backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
+            const string CorsPolicy = "allowAny";
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: CorsPolicy, builder => { builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); });
+            });
+
             // Add services to the container.
             builder.Services.AddDbContext<CaffContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -67,6 +74,9 @@ namespace Backend
             app.UseAuthorization();
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
+            app.UseRouting();
+            app.UseCors(CorsPolicy);
 
             app.UseAuthorization();
 

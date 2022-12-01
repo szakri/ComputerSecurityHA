@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { Caff } from '../models/caff';
 import { CaffService } from '../services/caffservice';
 
 @Component({
@@ -9,18 +10,9 @@ import { CaffService } from '../services/caffservice';
 })
 export class MainComponent implements OnInit {
   searchFormControl = new FormControl('');
-  caffs = [
-    { id: "1", name: "1", uploaderid: "1", uploaderusername: "1" },
-    { id: "1", name: "21", uploaderid: "1", uploaderusername: "1", },
-    { id: "1", name: "31", uploaderid: "1", uploaderusername: "1", },
-    { id: "1", name: "41", uploaderid: "1", uploaderusername: "1", },
-    { id: "1", name: "51", uploaderid: "1", uploaderusername: "1", },
-    { id: "1", name: "61", uploaderid: "1", uploaderusername: "1", },
-    { id: "1", name: "71", uploaderid: "1", uploaderusername: "1", },
-  ]
+  caffs: Caff[] = [];
 
   constructor(private caffService: CaffService) { }
-
 
   filterCAFFs() {
     this.getCaffsByName(this.searchFormControl.value);
@@ -30,19 +22,50 @@ export class MainComponent implements OnInit {
   }
   getCaffs() {
     this.caffService.getCaffs(null).subscribe(res => {
-      res.forEach(x => console.log(x.name));
       this.caffs = res;
+      //startTimer();
+
     })
   }
   getCaffsByName(searchterm: string | null) {
     if (searchterm != null) {
       this.caffService.getCaffs(searchterm).subscribe(res => {
         this.caffs = res;
+        //startTimer();
+
       })
     }
-
   }
-  
-  
+
+  getPreview(id: string) {
+    return this.caffService.getCaffPreview(id);
+  }
+
+  getPreviewGif(id:string) {
+    let url = "https://localhost:7235/api/caffs/" + id + "/preview";;
+    return url;
+  }
+
+  clearFormControl() {
+    this.searchFormControl.setValue("");
+    this.getCaffs();
+  }
 
 }
+
+
+/*function startTimer() {
+    console.log("started");
+  const gif = document.getElementById("gif");
+    gif!.setAttribute("src", gif!.getAttribute('src')!.toString());
+    setTimeout(function () { startTimer() }, 5000);
+}
+
+
+
+
+function restartGIF(gif: HTMLElement) {
+  gif!.setAttribute("src", gif.getAttribute('src')!.toString());
+  console.log("gifs restarted");
+}
+*/

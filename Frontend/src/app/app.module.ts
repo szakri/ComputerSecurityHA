@@ -25,12 +25,6 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { AuthService } from './services/authservice';
 
 
-
-
-
-
-
-
 @NgModule({
   declarations: [
     AppComponent,

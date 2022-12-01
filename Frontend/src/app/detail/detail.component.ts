@@ -13,7 +13,7 @@ import { CommentService } from '../services/commentservice';
   styleUrls: ['./detail.component.css']
 })
 export class DetailComponent {
-  caff?: Caff;
+  caff!: Caff;
   commentFormControl = new FormControl('');
   cid: string="";
 
@@ -35,5 +35,20 @@ export class DetailComponent {
     this.commentService.createComment(c).subscribe(res => {
 
     })
+  }
+
+  getPreviewGif() {
+    let url = "https://localhost:7235/api/caffs/" + this.caff.id + "/preview";
+    return url;
+  }
+
+  downloadCaff() {
+    const link = document.createElement('a');
+    link.setAttribute('target', '_blank');
+    link.setAttribute('href', this.caffService.downloadCaff(this.caff.id));
+    link.setAttribute('download', 'selected.caff');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 }

@@ -3,7 +3,7 @@ export interface Caff {
   
     id:  string,
     name: string ,
-    uploaderid:  string ,
-    uploaderusername: string,
+    uploaderId:  string ,
+    uploaderUsername: string,
    // comments: CComment[],
 }

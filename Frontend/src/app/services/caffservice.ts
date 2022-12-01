@@ -14,9 +14,12 @@ export class CaffService {
 
   getCaffs(searchby: string | null): Observable<Caff[]> {
     if (searchby) {
-      return this.http.get<Caff[]>(this.baseUrl + "?Name=" + "\"" + searchby +"\"" );
+      searchby = "Name==" +"\"" + searchby + "\"";
+      return this.http.get<Caff[]>(this.baseUrl + "?searchBy="  + searchby );
     }
-    return this.http.get<Caff[]>(this.baseUrl);
+    else {
+      return this.http.get<Caff[]>(this.baseUrl);
+    }
   }
 
 
@@ -24,13 +27,12 @@ export class CaffService {
     return this.http.get<Caff>(this.baseUrl + '/'+ id);
   }
 
-  getCaffPreview(id: string): Observable<Caff> {
+  getCaffPreview(id: string) {
     return this.http.get<Caff>(this.baseUrl + '/' + id + '/preview');
   }
 
-  //how does the file arrive?
-  downloadCaff(id: string): Observable<Caff> {
-    return this.http.get<Caff>(this.baseUrl + '/' + id + '/download');
+  downloadCaff(id: string){
+    return `${this.baseUrl}/${id}/download`;
   }
   //what is returning
   deleteCaff(id: string) {
