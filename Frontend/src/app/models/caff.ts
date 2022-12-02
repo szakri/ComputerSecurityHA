@@ -5,5 +5,5 @@ export interface Caff {
     name: string ,
     uploaderId:  string ,
     uploaderUsername: string,
-   // comments: CComment[],
+    comments: CComment[],
 }

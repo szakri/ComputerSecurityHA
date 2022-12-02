@@ -5,44 +5,45 @@ import * as moment from 'moment';
 
 import { User } from "../models/user";
 import { environments } from "../../environments/environment";
+import { LoginResponse } from "../models/loginresponse";
+import { Router } from "@angular/router";
 
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  headers: new HttpHeaders({ 'Content-Type': 'application/json;' })
 };
 
 @Injectable()
 export class AuthService {
   backendUrl = environments.backendUrl;
-   constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
   login(username: string | null, password: string | null) {
 
 
-    return this.http.get(this.backendUrl + '/test/login?username=' + username + "&password=" + password, httpOptions)
+    return this.http.get<LoginResponse>(this.backendUrl + '/test/login?username=' + username + "&password=" + password, httpOptions)
       .pipe(tap(res => {
         const expiresAt = moment().add(7200, 'second');
 
-        localStorage.setItem('id_token', JSON.stringify(res));
+        localStorage.setItem('id_token', JSON.stringify(res.token));
         localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()));
+        localStorage.setItem('user_id', JSON.stringify(res.userId));
+        localStorage.setItem('user_name', JSON.stringify(username));
 
-      })).subscribe(r => console.log("token: " + r));
+      })).subscribe(r => {
+        console.log("token: " + r);
+        this.router.navigate(['main']);
+      });
   }
 
-  register(username: string | null, password: string | null) {
-    return this.http.post<User>(this.backendUrl + '/users', { username, password })
-            .subscribe(res => this.setSession);
-  }
-
-  private setSession(authResult: { expiresIn: any; idToken: string; }) {
-    console.log("setsession");
-          const expiresAt = moment().add(authResult.expiresIn, 'second');
-
-          localStorage.setItem('id_token', authResult.idToken);
-          localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()));
+        register(username: string | null, password: string | null) {
+          return this.http.post<User>(this.backendUrl + '/users', { username, password })
+                  .subscribe(res => this.login(username, password));
         }
 
         logout() {
           localStorage.removeItem("id_token");
           localStorage.removeItem("expires_at");
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("user_name");
         }
 
         public isLoggedIn() {

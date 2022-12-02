@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Edit CAFF name</h1>
+<div mat-dialog-content>
+  <mat-form-field class="example-full-width">
+    <mat-label>Change name</mat-label>
+    
+    <input type="text" matInput [formControl]="nameFormControl">
+  </mat-form-field>
+  <div mat-dialog-actions style="justify-content: space-between;">
+    <button mat-raised-button (click)="cancelDialog()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="saveDialog()">Save</button>
+  </div>
+</div>

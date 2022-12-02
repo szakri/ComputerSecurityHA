@@ -1,8 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Caff } from '../models/caff';
 import { CComment } from '../models/comment';
+import { CommentPost } from '../models/commentpost';
 import { CaffService } from '../services/caffservice';
 import { CommentService } from '../services/commentservice';
 
@@ -15,14 +17,18 @@ import { CommentService } from '../services/commentservice';
 export class DetailComponent {
   caff!: Caff;
   commentFormControl = new FormControl('');
-  cid: string="";
+  cid: string = "";
+  isAdmin = false;
 
-  constructor(private route: ActivatedRoute, private caffService: CaffService, private commentService: CommentService) { }
+  constructor(private route: ActivatedRoute, private caffService: CaffService, private commentService: CommentService, public dialog: MatDialog, private router: Router) {
+    let userName = localStorage.getItem('user_name');
+    this.isAdmin = userName === "\"Admin\"";
+  }
 
   ngOnInit(): void {
     this.cid = this.route.snapshot.paramMap.get('id') as string;
     this.getCaffDetail(this.cid);
-
+    
   }
   getCaffDetail(id: string) {
     this.caffService.getCaffById(id).subscribe(res => {
@@ -31,9 +37,13 @@ export class DetailComponent {
   }
 
   sendComment() {
-    let c = { id: this.cid, text: this.commentFormControl.value!, uploaderid: 1, username: "" };
+    let userId = localStorage.getItem('user_id')?.replaceAll("\"", "");
+    let c: CommentPost = { caffId: this.caff.id, userId: userId!, commentText: this.commentFormControl.value! };
+    console.log('send comment: ' + c);
     this.commentService.createComment(c).subscribe(res => {
-
+      this.getCaffDetail(this.caff.id);
+      console.log('comment: ' + res);
+      this.commentFormControl.setValue("");
     })
   }
 
@@ -50,5 +60,74 @@ export class DetailComponent {
     document.body.appendChild(link);
     link.click();
     link.remove();
+  }
+
+  deleteCAFF() {
+    const dialogRef = this.dialog.open(DialogConfirmDelete);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result == "yes") {
+        this.caffService.deleteCaff(this.caff.id).subscribe(res =>
+          this.router.navigate(['main'])
+        );
+      }
+    });
+  }
+
+  openEditDialog() {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.data = {
+      name: this.caff.name
+    };
+    const dialogRef = this.dialog.open(DialogEditCAFF, dialogConfig);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      if (result != null) {
+
+        this.caffService.modifyCaff(result!, this.caff.id).subscribe(res =>
+          this.getCaffDetail(this.caff.id)
+        );
+      }
+    });
+  }
+
+}
+
+@Component({
+  selector: 'dialog-data-example-dialog',
+  templateUrl: 'dialog-edit.html',
+})
+export class DialogEditCAFF implements OnInit {
+  nameFormControl = new FormControl('');
+
+  constructor(public dialogRef: MatDialogRef<DialogEditCAFF>, @Inject(MAT_DIALOG_DATA) public data: Caff) { }
+
+  ngOnInit() {
+    this.nameFormControl.setValue(this.data.name);
+  }
+
+  cancelDialog() {
+    this.dialogRef.close();
+  }
+
+  saveDialog() {
+    this.dialogRef.close(this.nameFormControl.value);
+  }
+}
+
+@Component({
+  selector: 'dialog-data-example-dialog',
+  templateUrl: 'dialog-confirm-delete.html',
+})
+export class DialogConfirmDelete {
+
+  constructor(public dialogRef: MatDialogRef<DialogConfirmDelete>) { }
+
+
+  cancelDialog() {
+    this.dialogRef.close();
+  }
+
+  confirmDialog() {
+    this.dialogRef.close("yes");
   }
 }

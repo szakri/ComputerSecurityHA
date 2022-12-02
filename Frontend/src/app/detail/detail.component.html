@@ -14,112 +14,66 @@
   <!--JOBB OLDAL-->
   <mat-card fxLayout="column" fxLayoutAlign="start stretch" style="height:100%;">
 
-   
 
-<!--FELSO KARTYA-->
-      <mat-card class="divider-card">
-        <div style="display: flex; flex-direction: row; align-content: center; justify-content: space-between; align-items: center; margin:20px; margin-bottom:0px;">
-          <mat-card-title>Name: {{caff.name}}</mat-card-title>
-          <mat-card-title>Price: 0 HUF</mat-card-title>
+
+    <!--FELSO KARTYA-->
+    <mat-card class="divider-card">
+      <div style="display: flex; flex-direction: row; align-content: center; justify-content: space-between; align-items: center; margin:20px; margin-bottom:0px;">
+        <mat-card-title>Name: {{caff.name}}</mat-card-title>
+        <mat-card-title>Price: 0 HUF</mat-card-title>
+      </div>
+      <mat-card-subtitle style="margin:20px; margin-top:0">Uploaded by {{caff.uploaderUsername}}</mat-card-subtitle>
+
+      <div fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button style="margin:20px; margin-top:0;" color="warn" *ngIf="isAdmin" (click)="deleteCAFF()">
+          Delete
+        </button>
+        <button mat-raised-button style="margin:20px; margin-top:0;" color="primary" *ngIf="isAdmin" (click)="openEditDialog()">
+          Modify
+        </button>
+        <button mat-raised-button style="margin:20px; margin-top:0;" color="primary"
+                (click)="downloadCaff()">
+          Purchase
+        </button>
+      </div>
+    </mat-card>
+
+
+    <!--ALSO KARTYA-->
+    <mat-card class="second-card">
+      <mat-card-title style="margin:20px; margin-bottom:0;">Comment section</mat-card-title>
+      <div class="comments">
+        <div *ngFor="let comment of caff.comments">
+
+          <span><strong>{{comment.user.username}}</strong></span>
+          <br />
+          <span style="margin-left:10px;">{{comment.text}}</span>
+          <br /><br />
+
         </div>
-        <mat-card-subtitle style="margin:20px; margin-top:0">Uploaded by {{caff.uploaderUsername}}</mat-card-subtitle>
+      </div>
+    </mat-card>
 
-        <div fxLayout="row" fxLayoutAlign="end center">
-          <button mat-raised-button style="margin:20px; margin-top:0;" color="primary">
-            Modify
-          </button>
-          <button  mat-raised-button style="margin:20px; margin-top:0;" color="primary"
-                  (click)="downloadCaff()">
-            Purchase
-          </button>
-        </div>
-      </mat-card>
+    <!--COMMENT SECTION -->
+    <div class="comment-form">
 
 
-<!--ALSO KARTYA-->
-      <mat-card class="second-card" >
-        <mat-card-title style="margin:20px; margin-bottom:0;">Comment section</mat-card-title>
-        <div class="comments">
-          <div>
+    <mat-form-field class="example-full-width">
+      <mat-label>Leave a comment</mat-label>
+      <textarea rows="1" matInput placeholder="Ex. It makes me feel..." [formControl]="commentFormControl"></textarea>
+    </mat-form-field>
+    <button mat-fab color="primary" (click)="sendComment()">
+      <mat-icon>send</mat-icon>
+    </button>
 
-            <!--*ngFor="let comment of comments"-->
-            <!--{{comment.user.username}}: {{comment.text}}-->
-
-            <span>Username:an</span>
-
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <span>Username:</span>
-            <br />
-            <span style="margin-left:30px;">lorem ipsumfafrgnargoaga</span>
-            <br /><br />
-            <br /><br />
-
-          </div>
-        </div>
-      </mat-card>
-
-  <!--COMMENT SECTION-->
-      <form class="comment-form">
-     
-
-        <mat-form-field class="example-full-width">
-          <mat-label>Leave a comment</mat-label>
-          <textarea rows="1" matInput placeholder="Ex. It makes me feel..."></textarea>
-        </mat-form-field>
-        <button mat-fab color="primary" (click)="sendComment()">
-          <mat-icon>send</mat-icon>
-        </button></form>
-      
-
-   
-</mat-card>
+    </div>
 
 
 
 
-</div>
+  </mat-card>
+
+
+
+
+  </div>

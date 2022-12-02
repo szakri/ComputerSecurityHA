@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/authservice';
 
 @Component({
@@ -11,7 +12,7 @@ export class AuthComponent {
   userNameFormControl = new FormControl('', [Validators.required]);
   passwordFormControl = new FormControl('', [Validators.required]);
 
-  constructor(private authService:AuthService) { }
+  constructor(private authService: AuthService) { }
 
   signUp() {
     this.authService.register(this.userNameFormControl.value, this.passwordFormControl.value);

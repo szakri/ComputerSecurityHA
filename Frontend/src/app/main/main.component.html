@@ -1,25 +1,32 @@
 <div class="container">
-  <mat-form-field>
-    <mat-label>Search...</mat-label>
-    <input type="text" matInput [formControl]="searchFormControl">
-    <button *ngIf="searchFormControl" matSuffix mat-icon-button aria-label="Clear" (click)="clearFormControl()">
-      <mat-icon>close</mat-icon>
+  <div style="display: flex; justify-content: space-between;">
+    <div>
+      <mat-form-field>
+        <mat-label>Search...</mat-label>
+        <input type="text" matInput [formControl]="searchFormControl">
+        <button *ngIf="searchFormControl" matSuffix mat-icon-button aria-label="Clear" (click)="clearFormControl()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <button mat-raised-button style="margin-left:15px;z-index:0;" (click)="filterCAFFs()">Search</button>
+    </div>
+    <button mat-fab color="primary" matTooltip="Upload CAFF" (click)="openUploadDialog()">
+      <mat-icon>add</mat-icon>
     </button>
-  </mat-form-field>
-  <button mat-raised-button style="margin-left:15px;z-index:0;" (click)="filterCAFFs()">Search</button>
+  </div>
   <mat-grid-list cols="4" rowHeight="1:1">
 
-    <mat-grid-tile *ngFor="let caff of caffs" routerLink ="/details/{{caff.id}}">
-    <mat-card class="card">
-      <mat-card-header>
-        <mat-card-title>{{caff.name}}</mat-card-title>
-      </mat-card-header>
-      <img id="gif" mat-card-image style="height: inherit; width: inherit; border: solid 1px grey; " [src]="getPreviewGif(caff.id)" alt="Photo of a Shiba Inu">
-      <mat-card-content>
+    <mat-grid-tile *ngFor="let caff of caffs" routerLink="/details/{{caff.id}}">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>{{caff.name}}</mat-card-title>
+        </mat-card-header>
+        <img id="gif" mat-card-image style="height: inherit; width: inherit; border: solid 1px grey; " [src]="getPreviewGif(caff.id)" alt="Photo of a Shiba Inu">
+        <mat-card-content>
 
-      </mat-card-content>
-    </mat-card>
+        </mat-card-content>
+      </mat-card>
     </mat-grid-tile>
-    
+
   </mat-grid-list>
 </div>

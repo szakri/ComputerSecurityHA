@@ -1,5 +1,7 @@
+import { User } from "./user";
+
 export interface CComment {
   id: string,
   text: string,
-  username: string
+  user: User
 }
