@@ -1,4 +1,5 @@
-﻿using DAL;
+﻿using Backend.Services;
+using DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -99,7 +100,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("login")]
-        public ActionResult Login(string username, string password)
+        public ActionResult<LoginDTO> Login(string username, string password)
         {
             var user = context.Users.FirstOrDefault(u => u.Username== username && u.Password == password);
             if (user == null)
@@ -125,7 +126,11 @@ namespace Backend.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var stringToken = tokenHandler.WriteToken(token);
 
-            return Ok(stringToken);
+            return Ok(new LoginDTO
+            {
+                Token = stringToken,
+                UserId = Mapper.GetUserHash(user.Id)
+            });
         }
 
         [Authorize]
