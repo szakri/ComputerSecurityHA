@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Caff } from '../models/caff';
+import { CaffPreview } from '../models/caffpreview';
 import { CaffService } from '../services/caffservice';
 
 @Component({
@@ -12,6 +13,8 @@ import { CaffService } from '../services/caffservice';
 export class MainComponent implements OnInit {
   searchFormControl = new FormControl('');
   caffs: Caff[] = [];
+  caffPreviews: CaffPreview[] = [];
+  gifsArrived = false;
 
   constructor(private caffService: CaffService, private dialog: MatDialog) { }
 
@@ -24,8 +27,29 @@ export class MainComponent implements OnInit {
   getCaffs() {
     this.caffService.getCaffs(null).subscribe(res => {
       this.caffs = res;
+      this.caffs.forEach(x => {
+        let caffId = x.id;
+        this.caffService.getCaffPreview(caffId).subscribe(res1 => {
+          const reader = new FileReader();
+          let imageToShow;
+          if (res1) {
+            reader.readAsDataURL(res1);
+          }
+          reader.addEventListener("load", () => {
+            imageToShow = reader.result;
+            let caffPrew = { id: caffId, gif: imageToShow };
+
+            this.caffPreviews.push(caffPrew);
+            if (this.caffPreviews.length == this.caffs.length) {
+              this.gifsArrived = true;
+            }
+          }, false);
+
+        });
+      });
     })
   }
+
   getCaffsByName(searchterm: string | null) {
     if (searchterm != null) {
       this.caffService.getCaffs(searchterm).subscribe(res => {
@@ -34,13 +58,8 @@ export class MainComponent implements OnInit {
     }
   }
 
-  getPreview(id: string) {
-    return this.caffService.getCaffPreview(id);
-  }
-
-  getPreviewGif(id:string) {
-    let url = "https://localhost:7235/api/caffs/" + id + "/preview";;
-    return url;
+  getPreviewGif(id: string) {
+    return this.caffPreviews.find(x => x.id == id)?.gif;
   }
 
   clearFormControl() {

@@ -32,7 +32,7 @@ export class CaffService {
   }
 
   getCaffPreview(id: string) {
-    return this.http.get<Caff>(this.backendUrl + '/caffs/' + id + '/preview');
+    return this.http.get(this.backendUrl + '/caffs/' + id + '/preview', { responseType: 'blob' });
   }
 
   uploadCaff(file: FormData) {

@@ -19,6 +19,7 @@ export class DetailComponent {
   commentFormControl = new FormControl('');
   cid: string = "";
   isAdmin = false;
+  imageToShow: any;
 
   constructor(private route: ActivatedRoute, private caffService: CaffService, private commentService: CommentService, public dialog: MatDialog, private router: Router) {
     let userName = localStorage.getItem('user_name');
@@ -33,6 +34,16 @@ export class DetailComponent {
   getCaffDetail(id: string) {
     this.caffService.getCaffById(id).subscribe(res => {
       this.caff = res;
+      this.caffService.getCaffPreview(id).subscribe(res1 => {
+        console.log('preview res: ' + res1);
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          this.imageToShow = reader.result;
+        }, false);
+        if (res1) {
+          reader.readAsDataURL(res1);
+        }
+      });
     })
   }
 
@@ -47,10 +58,10 @@ export class DetailComponent {
     })
   }
 
-  getPreviewGif() {
+  /*getPreviewGif() {
     let url = "https://localhost:7235/api/caffs/" + this.caff.id + "/preview";
     return url;
-  }
+  }*/
 
   downloadCaff() {
     const link = document.createElement('a');

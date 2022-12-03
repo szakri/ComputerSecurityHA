@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -23,7 +23,7 @@ import { MatFormFieldModule, } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { AuthService } from './services/authservice';
+import { AuthInterceptor, AuthService } from './services/authservice';
 
 
 @NgModule({
@@ -52,7 +52,10 @@ import { AuthService } from './services/authservice';
     MatDialogModule,
     FormsModule
   ],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent],
   entryComponents: [DialogEditCAFF, DialogUploadCAFF, DialogConfirmDelete]
 })

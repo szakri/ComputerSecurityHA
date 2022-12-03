@@ -14,7 +14,7 @@
       <mat-icon>add</mat-icon>
     </button>
   </div>
-  <mat-grid-list cols="4" rowHeight="1:1">
+  <mat-grid-list cols="4" rowHeight="1:1" *ngIf="gifsArrived">
 
     <mat-grid-tile *ngFor="let caff of caffs" routerLink="/details/{{caff.id}}">
       <mat-card class="card">
