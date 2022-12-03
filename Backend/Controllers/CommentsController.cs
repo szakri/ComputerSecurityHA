@@ -1,5 +1,6 @@
 ﻿using Backend.Services;
 using DAL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
@@ -21,7 +22,8 @@ namespace Backend.Controllers
 
         // GET: api/comments
         [HttpGet]
-        public ActionResult<IEnumerable<CommentDTO>> Get()
+		[Authorize]
+		public ActionResult<IEnumerable<CommentDTO>> Get()
         {
             return Ok(context.Comments.Include(c => c.User)
                                       .Where(c => c.IsActive)
@@ -30,7 +32,8 @@ namespace Backend.Controllers
 
         // GET api/comments/{id}
         [HttpGet("{id}")]
-        public ActionResult<CommentDTO> Get(string id)
+		[Authorize]
+		public ActionResult<CommentDTO> Get(string id)
         {
             try
             {
@@ -51,7 +54,8 @@ namespace Backend.Controllers
 
         // POST api/comments
         [HttpPost]
-        public ActionResult<CommentDTO> Post([FromBody] NewCommentDTO newComment)
+		[Authorize]
+		public ActionResult<CommentDTO> Post([FromBody] NewCommentDTO newComment)
         {
             if (string.IsNullOrEmpty(newComment.CommentText))
             {
@@ -105,7 +109,8 @@ namespace Backend.Controllers
 
         // PATCH api/comments/{id}
         [HttpPatch("{id}")]
-        public ActionResult Patch(string id, [FromBody] string commentText)
+		[Authorize]
+		public ActionResult Patch(string id, [FromBody] string commentText)
         {
             if (string.IsNullOrEmpty(commentText))
             {
@@ -131,7 +136,8 @@ namespace Backend.Controllers
 
         // DELETE api/comments/{id}
         [HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+		[Authorize(Roles = "Admin")]
+		public ActionResult Delete(string id)
         {
             try
             {

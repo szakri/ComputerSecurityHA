@@ -2,6 +2,7 @@
 using Models;
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -32,22 +33,23 @@ namespace BackendTest
             }
         }
 
-        internal static async Task ResetDB(HttpClient client)
+        internal static async Task Reset(HttpClient client)
         {
-            await client.GetAsync("https://localhost:7206/api/Test/reset");
+			client.DefaultRequestHeaders.Authorization = null;
+			await client.GetAsync("https://localhost:7206/api/Test/reset");
         }
 
         internal static async Task<UserDTO> AddUser(HttpClient client, RegisterDTO user)
         {
             var response = await client.PostAsync("https://localhost:7206/api/Users",
                 new StringContent(JsonSerializer.Serialize(user), Encoding.UTF8, "application/json"));
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<UserDTO>(content);
+			return await response.Content.ReadFromJsonAsync<UserDTO>();
         }
 
         internal static async Task<CaffDTO> AddCaff(HttpClient client, UserDTO uploader, string fileName = "test")
         {
-            var current = Directory.GetCurrentDirectory();
+			await LoginWithSimpleUser(client);
+			var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
             UriBuilder builder = new("https://localhost:7206/api/Caffs");
             var query = HttpUtility.ParseQueryString(builder.Query);
@@ -59,21 +61,24 @@ namespace BackendTest
             multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
             var response = await client.PostAsync(builder.ToString(), multipartFormContent);
             var content = await response.Content.ReadAsStringAsync();
+            Logout(client);
             return JsonSerializer.Deserialize<CaffDTO>(content);
         }
 
         internal static async Task<CommentDTO> AddComment(HttpClient client, UserDTO user, CaffDTO caff, string commentText)
         {
-            var newComment = new NewCommentDTO()
+            await LoginWithSimpleUser(client);
+			var newComment = new NewCommentDTO()
             {
                 CaffId = caff.Id,
                 UserId = user.Id,
                 CommentText = commentText
             };
-            var response = await client.PostAsync(Utility.CommentsUrl,
+            var response = await client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json"));
-            var content = response.Content.ReadAsStringAsync().Result;
-            return JsonSerializer.Deserialize<CommentDTO>(content);
+            var content = await response.Content.ReadAsStringAsync();
+			Logout(client);
+			return JsonSerializer.Deserialize<CommentDTO>(content);
         }
 
         internal static bool CompareUserDTOs(UserDTO user1, UserDTO user2)
@@ -133,7 +138,7 @@ namespace BackendTest
             return JsonSerializer.Deserialize<CommentDTO>(content);
         }
 
-        internal static async Task Login(HttpClient client, RegisterDTO user)
+        public static async Task Login(HttpClient client, RegisterDTO user)
         {
             UriBuilder builder = new("https://localhost:7206/api/test/login");
             var query = HttpUtility.ParseQueryString(builder.Query);
@@ -141,10 +146,44 @@ namespace BackendTest
             query["password"] = user.Password;
             builder.Query = query.ToString();
             var response = await client.GetAsync(builder.ToString());
-            var token = await response.Content.ReadAsStringAsync();
+            var login = await response.Content.ReadFromJsonAsync<LoginDTO>();
 
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.Token);
         }
-    }
+
+        internal static async Task LoginWithSimpleUser(HttpClient client)
+        {
+            var register = new RegisterDTO
+            {
+                Username = "Test",
+                Password = "test"
+            };
+            try
+            {
+				await AddUser(client, register);
+			}
+            catch (Exception) { }
+            await Login(client, register);
+        }
+
+        internal static async Task LoginWithAdmin(HttpClient client)
+        {
+            var register = new RegisterDTO
+            {
+                Username = "Admin",
+                Password = "admin"
+            };
+			try
+			{
+				await AddUser(client, register);
+			}
+			catch (Exception) { }
+			await Login(client, register);
+        }
+
+		public static void Logout(HttpClient client)
+        {
+			client.DefaultRequestHeaders.Authorization = default;
+		}
+	}
 }

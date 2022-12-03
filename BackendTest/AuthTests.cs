@@ -42,6 +42,7 @@ namespace BackendTest
         public void PostUsers_ShouldNotBeAuthorized()
         {
             // Arrange
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -62,10 +63,11 @@ namespace BackendTest
         [MemberData(nameof(AuthorizedGetUrls))]
         public void Get_ShouldBeAuthorized(string url)
         {
-            // Arrange
+			// Arrange
+			Reset(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(url).Result;
+			// Act
+			var response = _client.GetAsync(url).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -75,8 +77,9 @@ namespace BackendTest
         [Fact]
         public void PostCaffs_ShouldBeAuthorized()
         {
-            // Arrange
-            var current = Directory.GetCurrentDirectory();
+			// Arrange
+			Reset(_client).Wait();
+			var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
             UriBuilder builder = new(CaffsUrl);
             var register = new RegisterDTO
@@ -105,8 +108,9 @@ namespace BackendTest
         [Fact]
         public void PatchCaffs_ShouldBeAuthorized()
         {
-            // Arrange
-            var user = AddUser(_client, new RegisterDTO
+			// Arrange
+			Reset(_client).Wait();
+			var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
@@ -126,8 +130,9 @@ namespace BackendTest
         [Fact]
         public void PostComments_ShouldBeAuthorized()
         {
-            // Arrange
-            var user = AddUser(_client, new RegisterDTO
+			// Arrange
+			Reset(_client).Wait();
+			var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
@@ -154,8 +159,9 @@ namespace BackendTest
         [Fact]
         public void PatchComments_ShouldBeAuthorized()
         {
-            // Arrange
-            var user = AddUser(_client, new RegisterDTO
+			// Arrange
+			Reset(_client).Wait();
+			var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
@@ -178,8 +184,11 @@ namespace BackendTest
         [MemberData(nameof(AuthorizedDeleteUrls))]
         public void Delete_ShouldBeAuthorized(string url)
         {
-            // Arrange, Act
-            var response = _client.DeleteAsync(url).Result;
+			// Arrange
+			Reset(_client).Wait();
+
+			// Act
+			var response = _client.DeleteAsync(url).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -190,7 +199,7 @@ namespace BackendTest
         public void PatchCaffs_ShouldBeAdminAuthorized()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -215,7 +224,7 @@ namespace BackendTest
         public void Delete_ShouldBeAdminAuthorized(string url)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",

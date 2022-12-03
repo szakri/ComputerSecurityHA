@@ -86,13 +86,7 @@ namespace Backend.Controllers
         [HttpGet("reset")]
         public void Reset()
         {
-            var current = Directory.GetCurrentDirectory();
             var caffs = context.Caffs.ToArray();
-            foreach (var caff in caffs)
-            {
-                System.IO.File.Delete(Path.Combine(current, "Files", $"{caff.FilePathWithoutExtension}.caff"));
-                System.IO.File.Delete(Path.Combine(current, "Previews", $"{caff.FilePathWithoutExtension}.gif"));
-            }
             context.Caffs.RemoveRange(caffs);
             context.Comments.RemoveRange(context.Comments.ToArray());
             context.Users.RemoveRange(context.Users.ToArray());
