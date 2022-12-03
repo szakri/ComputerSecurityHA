@@ -24,6 +24,7 @@ export class MainComponent implements OnInit {
   ngOnInit(): void {
     this.getCaffs();
   }
+
   getCaffs() {
     this.caffService.getCaffs(null).subscribe(res => {
       this.caffs = res;
@@ -70,10 +71,7 @@ export class MainComponent implements OnInit {
   openUploadDialog() {
     const dialogRef = this.dialog.open(DialogUploadCAFF);
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-      if (result != null) {
-        this.getCaffs();
-      }
+      this.getCaffs();
     });
   }
 

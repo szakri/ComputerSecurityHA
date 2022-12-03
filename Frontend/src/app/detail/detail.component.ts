@@ -35,7 +35,6 @@ export class DetailComponent {
     this.caffService.getCaffById(id).subscribe(res => {
       this.caff = res;
       this.caffService.getCaffPreview(id).subscribe(res1 => {
-        console.log('preview res: ' + res1);
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           this.imageToShow = reader.result;
@@ -50,27 +49,23 @@ export class DetailComponent {
   sendComment() {
     let userId = localStorage.getItem('user_id')?.replaceAll("\"", "");
     let c: CommentPost = { caffId: this.caff.id, userId: userId!, commentText: this.commentFormControl.value! };
-    console.log('send comment: ' + c);
     this.commentService.createComment(c).subscribe(res => {
       this.getCaffDetail(this.caff.id);
-      console.log('comment: ' + res);
       this.commentFormControl.setValue("");
     })
   }
 
-  /*getPreviewGif() {
-    let url = "https://localhost:7235/api/caffs/" + this.caff.id + "/preview";
-    return url;
-  }*/
-
   downloadCaff() {
-    const link = document.createElement('a');
-    link.setAttribute('target', '_blank');
-    link.setAttribute('href', this.caffService.downloadCaff(this.caff.id));
-    link.setAttribute('download', 'selected.caff');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    this.caffService.downloadCaff(this.caff.id).subscribe(res => {
+      var downloadURL = URL.createObjectURL(res);
+      const link = document.createElement('a');
+      link.setAttribute('target', '_blank');
+      link.setAttribute('href', downloadURL);
+      link.setAttribute('download', this.caff.name+'.caff');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
   }
 
   deleteCAFF() {
@@ -91,9 +86,7 @@ export class DetailComponent {
     };
     const dialogRef = this.dialog.open(DialogEditCAFF, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
       if (result != null) {
-
         this.caffService.modifyCaff(result!, this.caff.id).subscribe(res =>
           this.getCaffDetail(this.caff.id)
         );

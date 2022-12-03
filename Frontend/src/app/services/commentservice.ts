@@ -13,12 +13,7 @@ export class CommentService {
   backendUrl = environments.backendUrl;
   constructor(private http: HttpClient) { }
 
-  /*getComments(): Observable<CComment[]> {
-    return this.http.get<CComment[]>(this.baseUrl);
-  }*/
-
   createComment(newComment: CommentPost) {
-    console.log('comment service comment: ' + newComment);
     return this.http.post<CComment>(this.backendUrl + '/comments', newComment);
   }
 

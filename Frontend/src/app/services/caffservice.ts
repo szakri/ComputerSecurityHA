@@ -36,14 +36,12 @@ export class CaffService {
   }
 
   uploadCaff(file: FormData) {
-    const httpUploadOptions = {
-      //headers: new HttpHeaders({ 'Content-Type': undefined })
-    };
     return this.http.post(this.backendUrl + "/caffs?userId=" + localStorage.getItem('user_id')?.replaceAll("\"", ""), file);
   }
 
-  downloadCaff(id: string){
-    return `${this.backendUrl}/caffs/${id}/download`;
+  downloadCaff(id: string) {
+    return this.http.get(`${this.backendUrl}/caffs/${id}/download`, { responseType: 'blob' });
+    //return `${this.backendUrl}/caffs/${id}/download`;
   }
   
   deleteCaff(id: string) {
