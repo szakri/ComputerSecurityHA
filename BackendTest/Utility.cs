@@ -16,7 +16,8 @@ namespace BackendTest
         public static readonly string UsersUrl = "https://localhost:7206/api/Users";
         public static readonly string CaffsUrl = "https://localhost:7206/api/Caffs";
         public static readonly string CommentsUrl = "https://localhost:7206/api/Comments";
-        public static readonly object Lock = new();
+        public static readonly string LoginUrl = "https://localhost:7206/api/auth/login";
+		public static readonly object Lock = new();
 
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
         public class BeforeAfter : BeforeAfterTestAttribute
@@ -140,7 +141,7 @@ namespace BackendTest
 
         public static async Task Login(HttpClient client, RegisterDTO user)
         {
-            UriBuilder builder = new("https://localhost:7206/api/test/login");
+            UriBuilder builder = new(LoginUrl);
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["username"] = user.Username;
             query["password"] = user.Password;

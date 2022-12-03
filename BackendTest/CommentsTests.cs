@@ -132,7 +132,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No Comment was found with the id {commentId}!", content);
+            Assert.Equal($"\"No Comment was found with the id {commentId}!\"", content);
         }
 
         [BeforeAfter]
@@ -196,7 +196,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
+            Assert.Equal($"\"No CAFF file was found with the id {caffId}!\"", content);
         }
 
         [BeforeAfter]
@@ -228,7 +228,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No User was found with the id {userId}!", content);
+            Assert.Equal($"\"No User was found with the id {userId}!\"", content);
         }
 
         [BeforeAfter]
@@ -259,7 +259,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The commentText must be at least 1 character long!", content);
+            Assert.Equal("\"The commentText must be at least 1 character long!\"", content);
         }
 
         [BeforeAfter]
@@ -315,7 +315,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The commentText must be at least 1 character long!", content);
+            Assert.Equal("\"The commentText must be at least 1 character long!\"", content);
         }
 
         [BeforeAfter]
@@ -360,7 +360,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No Comment was found with the id {commentId}!", content);
+            Assert.Equal($"\"No Comment was found with the id {commentId}!\"", content);
         }
     }
 }

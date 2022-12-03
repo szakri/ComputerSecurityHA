@@ -23,10 +23,19 @@ namespace Backend.Controllers
             this.context = context;
         }
 
-        // GET: api/caffs
-        [HttpGet]
-        [Authorize]
-        public ActionResult<IEnumerable<CaffDTO>> GetWithFilter(string? searchBy = null)
+		/// <summary>
+		/// Returns all the CAFF files' information that match the searchBy term
+		/// (if it's empty all CAFF files' information returned)
+		/// </summary>
+		/// <param name="searchBy">Dynamic LINQ search term</param>
+		/// <returns></returns>
+		/// <response code="200">Returns the CAFF files' information</response>
+		// GET: api/caffs
+		[Authorize]
+		[HttpGet]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		public ActionResult<IEnumerable<CaffDTO>> GetWithFilter(string? searchBy = null)
         {
             if (string.IsNullOrEmpty(searchBy))
             {
@@ -50,9 +59,19 @@ namespace Backend.Controllers
             }
         }
 
-        // GET api/caffs/{id}
-        [HttpGet("{id}")]
+		/// <summary>
+		/// Returns the CAFF file's information
+		/// </summary>
+		/// <param name="id">CAFF file's id</param>
+		/// <returns></returns>
+		/// <response code="200">Returns the CAFF file's id</response>
+		/// <response code="404">If no CAFF file was found with the supplied id</response>
+		// GET api/caffs/{id}
 		[Authorize]
+		[HttpGet("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<CaffDTO> Get(string id)
         {
             try
@@ -74,9 +93,19 @@ namespace Backend.Controllers
             }
         }
 
-        // GET api/caffs/{id}/download
-        [HttpGet("{id}/download")]
+		/// <summary>
+		/// Returns the CAFF file
+		/// </summary>
+		/// <param name="id">CAFF file's id</param>
+		/// <returns></returns>
+		/// <response code="200">Returns the CAFF files</response>
+		/// <response code="404">If no CAFF file was found with the supplied id</response>
+		// GET api/caffs/{id}/download
 		[Authorize]
+		[HttpGet("{id}/download")]
+		[Produces("application/caff")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Download(string id)
         {
             try
@@ -98,9 +127,19 @@ namespace Backend.Controllers
             }
         }
 
-        // GET api/caffs/{id}/preview
-        [HttpGet("{id}/preview")]
+		/// <summary>
+		/// Returns the parsed CAFF file
+		/// </summary>
+		/// <param name="id">CAFF file's id</param>
+		/// <returns></returns>
+		/// <response code="200">Returns the parsed CAFF files</response>
+		/// <response code="404">If no CAFF file was found with the supplied id</response>
+		// GET api/caffs/{id}/preview
 		[Authorize]
+		[HttpGet("{id}/preview")]
+		[Produces("application/gif")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Preview(string id)
         {
             try
@@ -122,9 +161,23 @@ namespace Backend.Controllers
             }
         }
 
-        // POST api/caffs
-        [HttpPost]
-		//[Authorize]
+		/// <summary>
+		/// Uploads a CAFF file
+		/// </summary>
+		/// <param name="file">The CAFF file</param>
+		/// <param name="userId">The id of the uploader</param>
+		/// <returns></returns>
+		/// <response code="201">Successful upload</response>
+		/// <response code="400">If the content type is not multipart boundry or
+        /// the file extension is worng or the CAFF file is not valid</response>
+		/// <response code="404">If no user was found with the supplied id</response>
+		// POST api/caffs
+		[Authorize]
+		[HttpPost]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Post([FromForm] IFormFile file, [FromQuery] string userId)
         {
             if (string.IsNullOrEmpty(Request.GetMultipartBoundary()))
@@ -172,9 +225,22 @@ namespace Backend.Controllers
             
         }
 
-        // PATCH api/caffs/{id}
-        [HttpPatch("{id}")]
+		/// <summary>
+		/// Changes the name of the CAFF file
+		/// </summary>
+		/// <param name="id">CAFF file's id</param>
+		/// <param name="name">File's new name</param>
+		/// <returns></returns>
+		/// <response code="204">The change was successful</response>
+		/// <response code="400">If the new name is less than 1 character</response>
+		/// <response code="404">If no CAFF file was found with the supplied id</response>
+		// PATCH api/caffs/{id}
 		[Authorize(Roles = "Admin")]
+		[HttpPatch("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Patch(string id, [FromBody] string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -199,9 +265,19 @@ namespace Backend.Controllers
             }
         }
 
-        // DELETE api/caffs/{id}
-        [HttpDelete("{id}")]
+		/// <summary>
+		/// Deletes a CAFF file
+		/// </summary>
+		/// <param name="id">CAFF file's id</param>
+		/// <returns></returns>
+		/// <response code="204">The deletion was successful</response>
+		/// <response code="404">If no CAFF file was found with the supplied id</response>
+		// DELETE api/caffs/{id}
 		[Authorize(Roles = "Admin")]
+		[HttpDelete("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Delete(string id)
         {
             try

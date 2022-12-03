@@ -169,7 +169,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("Invalid searchBy term!", content);
+            Assert.Equal("\"Invalid searchBy term!\"", content);
         }
 
         [BeforeAfter]
@@ -216,7 +216,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
+            Assert.Equal($"\"No CAFF file was found with the id {caffId}!\"", content);
         }
 
         [BeforeAfter]
@@ -345,7 +345,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("Bad file extension!", content);
+            Assert.Equal("\"Bad file extension!\"", content);
         }
 
         [BeforeAfter]
@@ -374,7 +374,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No User was found with the id {userId}!", content);
+            Assert.Equal($"\"No User was found with the id {userId}!\"", content);
         }
 
         [BeforeAfter]
@@ -407,7 +407,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The CAFF file was not correct!", content);
+            Assert.Equal("\"The CAFF file was not correct!\"", content);
         }
 
         [BeforeAfter]
@@ -462,7 +462,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The name must be at least 1 character long!", content);
+            Assert.Equal("\"The name must be at least 1 character long!\"", content);
         }
 
         [BeforeAfter]
@@ -510,7 +510,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No CAFF file was found with the id {caffId}!", content);
+            Assert.Equal($"\"No CAFF file was found with the id {caffId}!\"", content);
         }
     }
 }

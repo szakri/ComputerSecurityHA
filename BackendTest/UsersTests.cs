@@ -90,7 +90,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No User was found with the id {userId}!", content);
+            Assert.Equal($"\"No User was found with the id {userId}!\"", content);
         }
 
         [BeforeAfter]
@@ -135,7 +135,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The Username must not be empty!", content);
+            Assert.Equal("\"The Username must not be empty!\"", content);
         }
 
         [BeforeAfter]
@@ -157,7 +157,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The Password must not be empty!", content);
+            Assert.Equal("\"The Password must not be empty!\"", content);
         }
 
         [BeforeAfter]
@@ -179,7 +179,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The Username must not contain whitespaces!", content);
+            Assert.Equal("\"The Username must not contain whitespaces!\"", content);
         }
 
         [BeforeAfter]
@@ -203,7 +203,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("The Username is already in use!", content);
+            Assert.Equal("\"The Username is already in use!\"", content);
         }
 
         [BeforeAfter]
@@ -248,7 +248,7 @@ namespace BackendTest
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal($"No User was found with the id {userId}!", content);
+            Assert.Equal($"\"No User was found with the id {userId}!\"", content);
         }
     }
 }
