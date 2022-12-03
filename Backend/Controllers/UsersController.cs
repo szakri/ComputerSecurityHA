@@ -1,5 +1,6 @@
 ﻿using Backend.Services;
 using DAL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
@@ -20,7 +21,8 @@ namespace Backend.Controllers
 
         // GET: api/users
         [HttpGet]
-        public ActionResult<IEnumerable<UserDTO>> Get()
+		[Authorize]
+		public ActionResult<IEnumerable<UserDTO>> Get()
         {
             return Ok(context.Users.Where(u => u.IsActive)
                                    .Select(u => Mapper.ToUserDTO(u))
@@ -29,7 +31,8 @@ namespace Backend.Controllers
 
         // GET api/users/{id}
         [HttpGet("{id}")]
-        public ActionResult<UserDTO> Get(string id)
+		[Authorize]
+		public ActionResult<UserDTO> Get(string id)
         {
             try
             {
@@ -79,7 +82,8 @@ namespace Backend.Controllers
 
         // DELETE api/users/{id}
         [HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+		[Authorize(Roles = "Admin")]
+		public ActionResult Delete(string id)
         {
             try
             {

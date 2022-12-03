@@ -1,5 +1,6 @@
 ﻿using Backend.Services;
 using DAL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace Backend.Controllers
 
         // GET: api/caffs
         [HttpGet]
+        [Authorize]
         public ActionResult<IEnumerable<CaffDTO>> GetWithFilter(string? searchBy = null)
         {
             if (string.IsNullOrEmpty(searchBy))
@@ -50,7 +52,8 @@ namespace Backend.Controllers
 
         // GET api/caffs/{id}
         [HttpGet("{id}")]
-        public ActionResult<CaffDTO> Get(string id)
+		[Authorize]
+		public ActionResult<CaffDTO> Get(string id)
         {
             try
             {
@@ -73,7 +76,8 @@ namespace Backend.Controllers
 
         // GET api/caffs/{id}/download
         [HttpGet("{id}/download")]
-        public ActionResult Download(string id)
+		[Authorize]
+		public ActionResult Download(string id)
         {
             try
             {
@@ -96,7 +100,8 @@ namespace Backend.Controllers
 
         // GET api/caffs/{id}/preview
         [HttpGet("{id}/preview")]
-        public ActionResult Preview(string id)
+		[Authorize]
+		public ActionResult Preview(string id)
         {
             try
             {
@@ -119,7 +124,8 @@ namespace Backend.Controllers
 
         // POST api/caffs
         [HttpPost]
-        public ActionResult Post([FromForm] IFormFile file, [FromQuery] string userId)
+		//[Authorize]
+		public ActionResult Post([FromForm] IFormFile file, [FromQuery] string userId)
         {
             if (string.IsNullOrEmpty(Request.GetMultipartBoundary()))
             {
@@ -147,10 +153,12 @@ namespace Backend.Controllers
             try
             {
                 var filePath = FileManager.SaveFile(file, user);
-                var caff = new Caff
+				var dotIndex = filePath.LastIndexOf('.');
+				var withoutExtension = filePath[..dotIndex];
+				var caff = new Caff
                 {
                     Name = Path.GetFileNameWithoutExtension(file.FileName),
-                    FilePathWithoutExtension = filePath,
+                    FilePathWithoutExtension = withoutExtension,
                     Uploader = user
                 };
                 context.Add(caff);
@@ -166,7 +174,8 @@ namespace Backend.Controllers
 
         // PATCH api/caffs/{id}
         [HttpPatch("{id}")]
-        public ActionResult Patch(string id, [FromBody] string name)
+		[Authorize(Roles = "Admin")]
+		public ActionResult Patch(string id, [FromBody] string name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -192,7 +201,8 @@ namespace Backend.Controllers
 
         // DELETE api/caffs/{id}
         [HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+		[Authorize(Roles = "Admin")]
+		public ActionResult Delete(string id)
         {
             try
             {

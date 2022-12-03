@@ -29,10 +29,11 @@ namespace BackendTest
         public void Get_NoCommentsOnInit()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(CommentsUrl).Result;
+			// Act
+			var response = _client.GetAsync(CommentsUrl).Result;
             var comments = response.Content.ReadFromJsonAsync<List<CommentDTO>>().Result;
 
             // Assert
@@ -46,8 +47,8 @@ namespace BackendTest
         public void Get_ReturnsAllComments()
         {
             // Arrange
-            ResetDB(_client).Wait();
-            var register1 = new RegisterDTO
+            Reset(_client).Wait();
+			var register1 = new RegisterDTO
             {
                 Username = "test1",
                 Password = "test1"
@@ -72,9 +73,10 @@ namespace BackendTest
             var commentText2 = "Second";
             var comment1 = AddComment(_client, user1, caff, commentText1).Result;
             var comment2 = AddComment(_client, user2, caff, commentText2).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(CommentsUrl).Result;
+			// Act
+			var response = _client.GetAsync(CommentsUrl).Result;
             var comments = response.Content.ReadFromJsonAsync<List<CommentDTO>>().Result;
 
             // Assert
@@ -89,7 +91,7 @@ namespace BackendTest
         public void Get_RetrunsCorrectComment()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -103,9 +105,10 @@ namespace BackendTest
             var caff = AddCaff(_client, user).Result;
             var commentText = "Test comment";
             var newComment = AddComment(_client, user, caff, commentText).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CommentsUrl}/{newComment.Id}").Result;
+			// Act
+			var response = _client.GetAsync($"{CommentsUrl}/{newComment.Id}").Result;
             var comment = response.Content.ReadFromJsonAsync<CommentDTO>().Result;
 
             // Assert
@@ -120,10 +123,11 @@ namespace BackendTest
         public void Get_RetrunsWithBadRequest(string commentId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CommentsUrl}/{commentId}").Result;
+			// Act
+			var response = _client.GetAsync($"{CommentsUrl}/{commentId}").Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -136,14 +140,13 @@ namespace BackendTest
         public void Post_CreatesSuccessfully()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
             }).Result;
             var caff = AddCaff(_client, user).Result;
-
             var commentText = "Test comment";
             var newComment = new NewCommentDTO()
             {
@@ -151,9 +154,10 @@ namespace BackendTest
                 UserId = user.Id,
                 CommentText = commentText
             };
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(CommentsUrl,
+			// Act
+			var response = _client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
             var comment = response.Content.ReadFromJsonAsync<CommentDTO>().Result;
 
@@ -170,13 +174,12 @@ namespace BackendTest
         public void Post_RetrunsWithNotFoundWithBadCaff(string caffId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
             }).Result;
-
             var commentText = "Test comment";
             var newComment = new NewCommentDTO()
             {
@@ -184,9 +187,10 @@ namespace BackendTest
                 UserId = user.Id,
                 CommentText = commentText
             };
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(CommentsUrl,
+			// Act
+			var response = _client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
@@ -201,14 +205,13 @@ namespace BackendTest
         public void Post_RetrunsWithNotFoundWithBadUser(string userId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
             }).Result;
             var caff = AddCaff(_client, user).Result;
-
             var commentText = "Test comment";
             var newComment = new NewCommentDTO()
             {
@@ -216,9 +219,10 @@ namespace BackendTest
                 UserId = userId,
                 CommentText = commentText
             };
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(CommentsUrl,
+			// Act
+			var response = _client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
@@ -233,7 +237,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithEmptyComment(string commentText)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
@@ -246,9 +250,10 @@ namespace BackendTest
                 UserId = user.Id,
                 CommentText = commentText
             };
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(CommentsUrl,
+			// Act
+			var response = _client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json")).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
@@ -262,7 +267,7 @@ namespace BackendTest
         public void Patch_ModifiesSuccessfully()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
@@ -272,9 +277,10 @@ namespace BackendTest
             var commentText = "Test";
             var comment = AddComment(_client, user, caff, commentText).Result;
             var newCommentText = "patch";
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
+			// Act
+			var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
                 new StringContent(JsonSerializer.Serialize(newCommentText), Encoding.UTF8, "application/json")).Result;
 
             // Assert
@@ -292,7 +298,7 @@ namespace BackendTest
         public void Patch_RetrunsWithBadRequestWithEmptyComment(string newCommentText)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
@@ -300,9 +306,10 @@ namespace BackendTest
             }).Result;
             var caff = AddCaff(_client, user).Result;
             var comment = AddComment(_client, user, caff, "test").Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
+			// Act
+			var response = _client.PatchAsync($"{CommentsUrl}/{comment.Id}",
                 new StringContent(JsonSerializer.Serialize(newCommentText), Encoding.UTF8, "application/json")).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
@@ -316,7 +323,7 @@ namespace BackendTest
         public void Delete_RemovesComment()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
@@ -325,9 +332,10 @@ namespace BackendTest
             var caff = AddCaff(_client, user).Result;
             var commentText = "Test";
             var comment = AddComment(_client, user, caff, commentText).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.DeleteAsync($"{CommentsUrl}/{comment.Id}").Result;
+			// Act
+			var response = _client.DeleteAsync($"{CommentsUrl}/{comment.Id}").Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -343,7 +351,8 @@ namespace BackendTest
         public void Delete_RetrunsWithBadRequest(string commentId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+            LoginWithAdmin(_client).Wait();
 
             // Act
             var response = _client.DeleteAsync($"{CommentsUrl}/{commentId}").Result;

@@ -25,10 +25,11 @@ namespace BackendTest
         public void Get_NoCaffsOnInit()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(CaffsUrl).Result;
+			// Act
+			var response = _client.GetAsync(CaffsUrl).Result;
             var caffs = response.Content.ReadFromJsonAsync<List<CaffDTO>>().Result;
 
             // Assert
@@ -42,7 +43,7 @@ namespace BackendTest
         public void Get_ReturnsAllCaffs()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register1 = new RegisterDTO
             {
                 Username = "test1",
@@ -65,9 +66,10 @@ namespace BackendTest
             };
             var caff1 = AddCaff(_client, user1).Result;
             var caff2 = AddCaff(_client, user2).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(CaffsUrl).Result;
+			// Act
+			var response = _client.GetAsync(CaffsUrl).Result;
             var caffs = response.Content.ReadFromJsonAsync<List<CaffDTO>>().Result;
 
             // Assert
@@ -85,7 +87,7 @@ namespace BackendTest
         public void Get_ReturnsAllFilteredCaffs(string searchBy, int matchNumber)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register1 = new RegisterDTO
             {
                 Username = "test1",
@@ -113,9 +115,10 @@ namespace BackendTest
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["searchBy"] = searchBy;
             builder.Query = query.ToString();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(builder.ToString()).Result;
+			// Act
+			var response = _client.GetAsync(builder.ToString()).Result;
             var caffs = response.Content.ReadFromJsonAsync<List<CaffDTO>>().Result;
 
             // Assert
@@ -130,7 +133,7 @@ namespace BackendTest
         public void Get_ReturnsBadRequestWithBadSearchBy(string searchBy)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register1 = new RegisterDTO
             {
                 Username = "test1",
@@ -158,9 +161,10 @@ namespace BackendTest
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["searchBy"] = searchBy;
             builder.Query = query.ToString();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync(builder.ToString()).Result;
+			// Act
+			var response = _client.GetAsync(builder.ToString()).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -173,7 +177,7 @@ namespace BackendTest
         public void Get_RetrunsCorrectCaff()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -185,9 +189,10 @@ namespace BackendTest
                 Username = register.Username
             };
             var upload = AddCaff(_client, uploader).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}").Result;
+			// Act
+			var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}").Result;
             var caff = response.Content.ReadFromJsonAsync<CaffDTO>().Result;
 
             // Assert
@@ -202,10 +207,11 @@ namespace BackendTest
         public void Get_RetrunsWithBadRequest(string caffId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CaffsUrl}/{caffId}").Result;
+			// Act
+			var response = _client.GetAsync($"{CaffsUrl}/{caffId}").Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -218,7 +224,7 @@ namespace BackendTest
         public void Get_ReturnsCorrectDownloadFile()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -230,13 +236,14 @@ namespace BackendTest
                 Username = register.Username
             };
             var upload = AddCaff(_client, uploader, "download").Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}/download").Result;
+			// Act
+			var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}/download").Result;
             var content = response.Content.ReadAsByteArrayAsync().Result;
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+			// Assert
+			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(4_002_260, content.Length);
         }
 
@@ -245,7 +252,7 @@ namespace BackendTest
         public void Get_ReturnsCorrectPreviewFile()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -257,9 +264,10 @@ namespace BackendTest
                 Username = register.Username
             };
             var upload = AddCaff(_client, uploader, "preview").Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}/preview").Result;
+			// Act
+			var response = _client.GetAsync($"{CaffsUrl}/{upload.Id}/preview").Result;
             var content = response.Content.ReadAsByteArrayAsync().Result;
 
             // Assert
@@ -272,7 +280,7 @@ namespace BackendTest
         public void Post_CreatesSuccessfully()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
             UriBuilder builder = new(CaffsUrl);
@@ -290,9 +298,10 @@ namespace BackendTest
             var multipartFormContent = new MultipartFormDataContent();
             var fileName = "test";
             multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
+			// Act
+			var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
             var caff = response.Content.ReadFromJsonAsync<CaffDTO>().Result;
 
             // Assert
@@ -310,7 +319,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithBadExtension(string extension)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
             UriBuilder builder = new(CaffsUrl);
@@ -328,9 +337,10 @@ namespace BackendTest
             var multipartFormContent = new MultipartFormDataContent();
             var fileName = "test";
             multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.{extension}");
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
+			// Act
+			var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -344,7 +354,7 @@ namespace BackendTest
         public void Post_RetrunsWithNoContentWithBadUser(string userId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var current = Directory.GetCurrentDirectory();
             var filePath = Path.Combine(current, "Resources", "test.caff");
             UriBuilder builder = new(CaffsUrl);
@@ -356,9 +366,10 @@ namespace BackendTest
             var multipartFormContent = new MultipartFormDataContent();
             var fileName = "test";
             multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
+			// Act
+			var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -367,14 +378,13 @@ namespace BackendTest
         }
 
         [BeforeAfter]
-        [Theory]
-        [InlineData("exception")]
-        public void Post_RetrunsWithBadRequestWithBadCaff(string fileName)
+        [Fact]
+        public void Post_RetrunsWithBadRequestWithBadCaff()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var current = Directory.GetCurrentDirectory();
-            var filePath = Path.Combine(current, "Resources", "test.caff");
+            var filePath = Path.Combine(current, "Resources", "bad.caff");
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -388,10 +398,11 @@ namespace BackendTest
             var fileStreamContent = new StreamContent(File.OpenRead(filePath));
             fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue($"image/caff");
             var multipartFormContent = new MultipartFormDataContent();
-            multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
+            multipartFormContent.Add(fileStreamContent, name: "file", fileName: "test.caff");
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
+			// Act
+			var response = _client.PostAsync(builder.ToString(), multipartFormContent).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -404,7 +415,7 @@ namespace BackendTest
         public void Patch_ModifiesSuccessfully()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
@@ -412,9 +423,10 @@ namespace BackendTest
             }).Result;
             var caff = AddCaff(_client, user).Result;
             var newName = "patch";
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PatchAsync($"{CaffsUrl}/{caff.Id}",
+			// Act
+			var response = _client.PatchAsync($"{CaffsUrl}/{caff.Id}",
                 new StringContent(JsonSerializer.Serialize(newName), Encoding.UTF8, "application/json")).Result;
 
             // Assert
@@ -434,16 +446,17 @@ namespace BackendTest
         public void Patch_RetrunsWithBadRequest(string newName)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var user = AddUser(_client, new RegisterDTO
             {
                 Username = "test",
                 Password = "test"
             }).Result;
             var caff = AddCaff(_client, user).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.PatchAsync($"{CaffsUrl}/{caff.Id}",
+			// Act
+			var response = _client.PatchAsync($"{CaffsUrl}/{caff.Id}",
                 new StringContent(JsonSerializer.Serialize(newName), Encoding.UTF8, "application/json")).Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
@@ -457,7 +470,7 @@ namespace BackendTest
         public void Delete_RemovesUser()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -469,9 +482,10 @@ namespace BackendTest
                 Username = register.Username
             };
             var caff = AddCaff(_client, uploader).Result;
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.DeleteAsync($"{CaffsUrl}/{caff.Id}").Result;
+			// Act
+			var response = _client.DeleteAsync($"{CaffsUrl}/{caff.Id}").Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -487,7 +501,8 @@ namespace BackendTest
         public void Delete_RetrunsWithBadRequest(string caffId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+            LoginWithAdmin(_client).Wait();
 
             // Act
             var response = _client.DeleteAsync($"{CaffsUrl}/{caffId}").Result;

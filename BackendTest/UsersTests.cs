@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Web;
 using static BackendTest.Utility;
 using System.Net.Http.Json;
+using System.Runtime.Intrinsics.X86;
 
 namespace BackendTest
 {
@@ -25,7 +26,7 @@ namespace BackendTest
         public void Get_ReturnsAllUsers()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register1 = new RegisterDTO
             {
                 Username = "test1",
@@ -38,6 +39,7 @@ namespace BackendTest
             };
             var user1 = AddUser(_client, register1).Result;
             var user2 = AddUser(_client, register2).Result;
+            Login(_client, register1).Wait();
 
             // Act
             var response = _client.GetAsync(UsersUrl).Result;
@@ -54,7 +56,8 @@ namespace BackendTest
         public void Get_RetrunsCorrectUser()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+            LoginWithAdmin(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -78,10 +81,11 @@ namespace BackendTest
         public void Get_RetrunsWithBadRequest(string userId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+			LoginWithAdmin(_client).Wait();
 
-            // Act
-            var response = _client.GetAsync($"{UsersUrl}/{userId}").Result;
+			// Act
+			var response = _client.GetAsync($"{UsersUrl}/{userId}").Result;
             var content = response.Content.ReadAsStringAsync().Result;
 
             // Assert
@@ -94,7 +98,7 @@ namespace BackendTest
         public void Post_CreatesSuccessfully()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -117,7 +121,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithEmptyUsername()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "",
@@ -139,7 +143,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithEmptyPassword()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -161,7 +165,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithUsernameWithWhiteSpace()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test test",
@@ -183,7 +187,7 @@ namespace BackendTest
         public void Post_RetrunsWithBadRequestWithExsitsingUsername()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -207,7 +211,8 @@ namespace BackendTest
         public void Delete_RemovesUser()
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+            LoginWithAdmin(_client).Wait();
             var register = new RegisterDTO
             {
                 Username = "test",
@@ -223,8 +228,10 @@ namespace BackendTest
             response = _client.GetAsync(UsersUrl).Result;
             var users = response.Content.ReadFromJsonAsync<List<UserDTO>>().Result;
             Assert.NotNull(users);
-            Assert.Empty(users);
-        }
+            // Because of the admin login
+            var user = Assert.Single(users);
+            Assert.Equal("Admin", user.Username);
+		}
 
         [BeforeAfter]
         [Theory]
@@ -232,7 +239,8 @@ namespace BackendTest
         public void Delete_RetrunsWithBadRequest(string userId)
         {
             // Arrange
-            ResetDB(_client).Wait();
+            Reset(_client).Wait();
+            LoginWithAdmin(_client).Wait();
 
             // Act
             var response = _client.DeleteAsync($"{UsersUrl}/{userId}").Result;

@@ -29,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\bad.caff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\test.caff">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
