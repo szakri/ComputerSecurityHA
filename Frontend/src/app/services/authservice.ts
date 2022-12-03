@@ -22,7 +22,9 @@ export class AuthService {
 
     return this.http.get<LoginResponse>(this.backendUrl + '/auth/login?username=' + username + "&password=" + password, httpOptions)
       .pipe(tap(res => {
-        const expiresAt = moment().add(7200, 'second');
+        const jwtToken = JSON.parse(atob(res.token.split('.')[1]));
+        const expires = new Date(jwtToken.exp * 1000);
+        const expiresAt = moment(expires);
 
         localStorage.setItem('id_token', JSON.stringify(res.token));
         localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()));
