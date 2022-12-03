@@ -14,7 +14,6 @@ mat-grid-tile {
   display: flex;
   justify-content: center;
   align-items: center;
-  //border: solid 1px grey;
   margin: 10px;
   height: -webkit-fill-available;
   width: -webkit-fill-available;

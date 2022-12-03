@@ -1,6 +1,6 @@
 import { HttpClient, HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { catchError, Observable, pipe, tap, throwError } from "rxjs";
+import { catchError, Observable, tap, throwError } from "rxjs";
 import * as moment from 'moment';
 
 import { User } from "../models/user";
@@ -20,7 +20,7 @@ export class AuthService {
   login(username: string | null, password: string | null) {
 
 
-    return this.http.get<LoginResponse>(this.backendUrl + '/test/login?username=' + username + "&password=" + password, httpOptions)
+    return this.http.get<LoginResponse>(this.backendUrl + '/auth/login?username=' + username + "&password=" + password, httpOptions)
       .pipe(tap(res => {
         const expiresAt = moment().add(7200, 'second');
 
@@ -54,7 +54,7 @@ export class AuthService {
           } else {
             this.snackbar.open(JSON.stringify(error), "", { duration: 3000 });
           }
-          return throwError(error);
+          return throwError(() => new Error(error));
         }
 
         logout() {

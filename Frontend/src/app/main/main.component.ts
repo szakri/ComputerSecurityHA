@@ -1,6 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Caff } from '../models/caff';
 import { CaffPreview } from '../models/caffpreview';
 import { CaffService } from '../services/caffservice';
@@ -81,17 +81,13 @@ export class MainComponent implements OnInit {
   selector: 'dialog-data-example-dialog',
   templateUrl: 'dialog-upload.html',
 })
-export class DialogUploadCAFF implements OnInit {
+export class DialogUploadCAFF {
   fileName = '';
   formData = new FormData();
   file!: File;
 
 
   constructor(public dialogRef: MatDialogRef<DialogUploadCAFF>, private caffService: CaffService) { }
-
-  ngOnInit() {
-    
-  }
 
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -102,12 +98,8 @@ export class DialogUploadCAFF implements OnInit {
       this.fileName = this.file.name;
 
       this.formData.append("file", this.file);
-      this.formData;
       
     }
-  }
-
-  cancelDialog() {
   }
 
   saveDialog() {

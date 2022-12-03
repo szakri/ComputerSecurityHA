@@ -41,7 +41,6 @@ export class CaffService {
 
   downloadCaff(id: string) {
     return this.http.get(`${this.backendUrl}/caffs/${id}/download`, { responseType: 'blob' });
-    //return `${this.backendUrl}/caffs/${id}/download`;
   }
   
   deleteCaff(id: string) {

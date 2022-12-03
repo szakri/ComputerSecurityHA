@@ -1,9 +1,8 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Caff } from '../models/caff';
-import { CComment } from '../models/comment';
 import { CommentPost } from '../models/commentpost';
 import { CaffService } from '../services/caffservice';
 import { CommentService } from '../services/commentservice';
@@ -57,7 +56,7 @@ export class DetailComponent {
 
   downloadCaff() {
     this.caffService.downloadCaff(this.caff.id).subscribe(res => {
-      var downloadURL = URL.createObjectURL(res);
+      let downloadURL = URL.createObjectURL(res);
       const link = document.createElement('a');
       link.setAttribute('target', '_blank');
       link.setAttribute('href', downloadURL);
@@ -87,7 +86,7 @@ export class DetailComponent {
     const dialogRef = this.dialog.open(DialogEditCAFF, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
       if (result != null) {
-        this.caffService.modifyCaff(result!, this.caff.id).subscribe(res =>
+        this.caffService.modifyCaff(result, this.caff.id).subscribe(res =>
           this.getCaffDetail(this.caff.id)
         );
       }

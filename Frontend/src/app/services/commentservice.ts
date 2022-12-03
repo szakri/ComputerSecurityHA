@@ -1,6 +1,5 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
 import { environments } from "../../environments/environment";
 import { CComment } from "../models/comment";
 import { CommentPost } from "../models/commentpost";
