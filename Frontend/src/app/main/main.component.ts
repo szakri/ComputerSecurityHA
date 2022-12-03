@@ -80,21 +80,21 @@ export class DialogUploadCAFF implements OnInit {
     const target = event.target as HTMLInputElement;
     this.file = target.files![0];
 
-    /*if (this.file) {
+    if (this.file) {
 
-      this.fileName = file.name;
+      this.fileName = this.file.name;
 
-      this.formData.append("thumbnail", file);
+      this.formData.append("file", this.file);
       this.formData;
       
-    }*/
+    }
   }
 
   cancelDialog() {
   }
 
   saveDialog() {
-    const upload$ = this.caffService.uploadCaff(this.file);
+    const upload$ = this.caffService.uploadCaff(this.formData);
 
     upload$.subscribe(res => 
       this.dialogRef.close()

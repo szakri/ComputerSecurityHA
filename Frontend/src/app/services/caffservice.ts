@@ -35,11 +35,11 @@ export class CaffService {
     return this.http.get<Caff>(this.backendUrl + '/caffs/' + id + '/preview');
   }
 
-  uploadCaff(file: File) {
+  uploadCaff(file: FormData) {
     const httpUploadOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/x-www-url-formencoded;' })
+      //headers: new HttpHeaders({ 'Content-Type': undefined })
     };
-    return this.http.post(this.backendUrl + "/caffs?userId=" + localStorage.getItem('user_id')?.replaceAll("\"", ""), file, httpUploadOptions);
+    return this.http.post(this.backendUrl + "/caffs?userId=" + localStorage.getItem('user_id')?.replaceAll("\"", ""), file);
   }
 
   downloadCaff(id: string){
