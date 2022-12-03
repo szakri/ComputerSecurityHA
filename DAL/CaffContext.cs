@@ -7,8 +7,8 @@ namespace DAL
     {
         public CaffContext(DbContextOptions<CaffContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Caff> Caffs { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-    }
+        public DbSet<User> Users { get; set; } = default!;
+		public DbSet<Caff> Caffs { get; set; } = default!;
+		public DbSet<Comment> Comments { get; set; } = default!;
+	}
 }

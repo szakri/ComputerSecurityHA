@@ -2,7 +2,7 @@
 {
 	public class LoginDTO
 	{
-		public string Token { get; set; }
-		public string UserId { get; set; }
+		public string Token { get; set; } = default!;
+		public string UserId { get; set; } = default!;
 	}
 }

@@ -15,9 +15,11 @@ namespace BackendTest
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType ==
                         typeof(DbContextOptions<CaffContext>));
-
-                services.Remove(descriptor);
-
+                if (descriptor != null)
+                {
+					services.Remove(descriptor);
+				}
+                
                 services.AddDbContext<CaffContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");

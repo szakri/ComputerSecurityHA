@@ -44,7 +44,12 @@ namespace BackendTest
         {
             var response = await client.PostAsync("https://localhost:7206/api/Users",
                 new StringContent(JsonSerializer.Serialize(user), Encoding.UTF8, "application/json"));
-			return await response.Content.ReadFromJsonAsync<UserDTO>();
+			var content = await response.Content.ReadFromJsonAsync<UserDTO>();
+            if (content == null)
+            {
+                throw new Exception("User could not be added!");
+            }
+            return content;
         }
 
         internal static async Task<CaffDTO> AddCaff(HttpClient client, UserDTO uploader, string fileName = "test")
@@ -61,10 +66,14 @@ namespace BackendTest
             var multipartFormContent = new MultipartFormDataContent();
             multipartFormContent.Add(fileStreamContent, name: "file", fileName: $"{fileName}.caff");
             var response = await client.PostAsync(builder.ToString(), multipartFormContent);
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadFromJsonAsync<CaffDTO>();
             Logout(client);
-            return JsonSerializer.Deserialize<CaffDTO>(content);
-        }
+			if (content == null)
+            {
+				throw new Exception("CAFF could not be added!");
+			}
+            return content;
+		}
 
         internal static async Task<CommentDTO> AddComment(HttpClient client, UserDTO user, CaffDTO caff, string commentText)
         {
@@ -77,9 +86,13 @@ namespace BackendTest
             };
             var response = await client.PostAsync(CommentsUrl,
                 new StringContent(JsonSerializer.Serialize(newComment), Encoding.UTF8, "application/json"));
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadFromJsonAsync<CommentDTO>();
 			Logout(client);
-			return JsonSerializer.Deserialize<CommentDTO>(content);
+            if (content == null)
+            {
+				throw new Exception("Comment could not be added!");
+			}
+			return content;
         }
 
         internal static bool CompareUserDTOs(UserDTO user1, UserDTO user2)
@@ -128,15 +141,23 @@ namespace BackendTest
         internal static async Task<CaffDTO> GetCaff(HttpClient client, string id)
         {
             var response = await client.GetAsync($"{CaffsUrl}/{id}");
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<CaffDTO>(content);
+            var content = await response.Content.ReadFromJsonAsync<CaffDTO>();
+            if (content == null)
+            {
+                throw new Exception("Could not get the CAFF!");
+            }
+            return content;
         }
 
         internal static async Task<CommentDTO> GetComment(HttpClient client, string id)
         {
             var response = await client.GetAsync($"{CommentsUrl}/{id}");
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<CommentDTO>(content);
+            var content = await response.Content.ReadFromJsonAsync<CommentDTO>();
+			if (content == null)
+			{
+				throw new Exception("Could not get the comment!");
+			}
+			return content;
         }
 
         public static async Task Login(HttpClient client, RegisterDTO user)
@@ -148,7 +169,10 @@ namespace BackendTest
             builder.Query = query.ToString();
             var response = await client.GetAsync(builder.ToString());
             var login = await response.Content.ReadFromJsonAsync<LoginDTO>();
-
+            if (login == null)
+            {
+                throw new Exception("Could not login!");
+            }
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.Token);
         }
 

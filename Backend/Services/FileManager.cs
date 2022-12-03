@@ -5,7 +5,7 @@ namespace Backend.Services
 {
     public class CaffException : Exception
     {
-        public CaffException(string? message) : base(message){ }
+        public CaffException(string? message = null) : base(message){ }
     }
 
     public static class FileManager
@@ -36,8 +36,13 @@ namespace Backend.Services
 
         private static void GeneratePreview(string filePath)
         {
-            var current = Directory.GetCurrentDirectory();
-            var previews = Path.Combine(current, "Previews", Path.GetDirectoryName(filePath));
+            var directory = Path.GetDirectoryName(filePath);
+            if (directory == null)
+            {
+                throw new CaffException();
+            }
+			var current = Directory.GetCurrentDirectory();
+            var previews = Path.Combine(current, "Previews", directory);
             Directory.CreateDirectory(previews);
             var fileName = Path.GetFileName(filePath);
             var dotIndex = fileName.LastIndexOf('.');
