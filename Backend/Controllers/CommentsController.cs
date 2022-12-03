@@ -20,9 +20,16 @@ namespace Backend.Controllers
             this.context = context;
         }
 
-        // GET: api/comments
-        [HttpGet]
+		/// <summary>
+		/// Returns all the comments
+		/// </summary>
+		/// <returns></returns>
+		/// <response code="200">Returns all the comments</response>
+		// GET: api/comments
 		[Authorize]
+		[HttpGet]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
 		public ActionResult<IEnumerable<CommentDTO>> Get()
         {
             return Ok(context.Comments.Include(c => c.User)
@@ -30,9 +37,19 @@ namespace Backend.Controllers
                                       .Select(c => Mapper.ToCommentDTO(c)));
         }
 
-        // GET api/comments/{id}
-        [HttpGet("{id}")]
+		/// <summary>
+		/// Returns the comment
+		/// </summary>
+		/// <param name="id">The comment's id</param>
+		/// <returns></returns>
+		/// <response code="200">Returns the comment</response>
+		/// <response code="404">If no comment was found with the supplied id</response>
+		// GET api/comments/{id}
 		[Authorize]
+		[HttpGet("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<CommentDTO> Get(string id)
         {
             try
@@ -52,9 +69,21 @@ namespace Backend.Controllers
             }
         }
 
-        // POST api/comments
-        [HttpPost]
+		/// <summary>
+		/// Adds a new comment to a CAFF file
+		/// </summary>
+		/// <param name="newComment">New comment with the commenter's id, CAFF file's id and the comment text</param>
+		/// <returns></returns>
+		/// <response code="201">The comment was added successfuly</response>
+		/// <response code="400">If the comment text was less than 1 character long</response>
+		/// <response code="404">If no user or CAFF file was found with the supplied id</response>
+		// POST api/comments
 		[Authorize]
+		[HttpPost]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<CommentDTO> Post([FromBody] NewCommentDTO newComment)
         {
             if (string.IsNullOrEmpty(newComment.CommentText))
@@ -107,9 +136,22 @@ namespace Backend.Controllers
             return CreatedAtAction("Get", new { id = Mapper.GetCommentHash(comment.Id) }, Mapper.ToCommentDTO(comment));
         }
 
-        // PATCH api/comments/{id}
-        [HttpPatch("{id}")]
+		/// <summary>
+		/// Changes the text of the comment
+		/// </summary>
+		/// <param name="id">The comment's id</param>
+		/// <param name="commentText">New comment's text</param>
+		/// <returns></returns>
+		/// <response code="204">The change was successful</response>
+		/// <response code="400">If the new name is less than 1 character</response>
+		/// <response code="404">If no comment was found with the supplied id</response>
+		// PATCH api/comments/{id}
 		[Authorize]
+		[HttpPatch("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Patch(string id, [FromBody] string commentText)
         {
             if (string.IsNullOrEmpty(commentText))
@@ -134,9 +176,19 @@ namespace Backend.Controllers
             }
         }
 
-        // DELETE api/comments/{id}
-        [HttpDelete("{id}")]
+		/// <summary>
+		/// Deletes a comment
+		/// </summary>
+		/// <param name="id">the comment's id</param>
+		/// <returns></returns>
+		/// <response code="204">The deletion was successful</response>
+		/// <response code="404">If no comment was found with the supplied id</response>
+		// DELETE api/comments/{id}
 		[Authorize(Roles = "Admin")]
+		[HttpDelete("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Delete(string id)
         {
             try

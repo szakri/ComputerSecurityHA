@@ -19,9 +19,16 @@ namespace Backend.Controllers
             this.context = context;
         }
 
-        // GET: api/users
-        [HttpGet]
+		/// <summary>
+		/// Returns all the registered users
+		/// </summary>
+		/// <returns></returns>
+		/// <response code="200">Returns all the registered users</response>
+		// GET: api/users
 		[Authorize]
+		[HttpGet]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
 		public ActionResult<IEnumerable<UserDTO>> Get()
         {
             return Ok(context.Users.Where(u => u.IsActive)
@@ -29,9 +36,19 @@ namespace Backend.Controllers
                                    .ToList());
         }
 
-        // GET api/users/{id}
-        [HttpGet("{id}")]
+		/// <summary>
+		/// Returns the user
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		/// <response code="200">Returns the user</response>
+		/// <response code="404">If no user was found with the supplied id</response>
+		// GET api/users/{id}
 		[Authorize]
+		[HttpGet("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<UserDTO> Get(string id)
         {
             try
@@ -50,9 +67,19 @@ namespace Backend.Controllers
             }
         }
 
-        // POST api/users
-        [HttpPost]
-        public ActionResult Post([FromBody] RegisterDTO user)
+		/// <summary>
+		/// Registers a new user
+		/// </summary>
+		/// <param name="user">The new user's username and password</param>
+		/// <returns></returns>
+		/// <response code="201">The user was added successfuly</response>
+		/// <response code="400">If the user's username or password or the username contains whitespaces or already is in use</response>
+		// POST api/users
+		[HttpPost]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public ActionResult Post([FromBody] RegisterDTO user)
         {
             if (string.IsNullOrWhiteSpace(user.Username))
             {
@@ -80,9 +107,19 @@ namespace Backend.Controllers
             return CreatedAtAction("Get", new { id = Mapper.GetUserHash(newUser.Id) }, Mapper.ToUserDTO(newUser));
         }
 
-        // DELETE api/users/{id}
-        [HttpDelete("{id}")]
+		/// <summary>
+		/// Deletes the user
+		/// </summary>
+		/// <param name="id">the user's id</param>
+		/// <returns></returns>
+		/// <response code="204">The deletion was successful</response>
+		/// <response code="404">If no user was found with the supplied id</response>
+		// DELETE api/users/{id}
 		[Authorize(Roles = "Admin")]
+		[HttpDelete("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult Delete(string id)
         {
             try
