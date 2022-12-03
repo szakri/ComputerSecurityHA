@@ -2,8 +2,8 @@
 {
     public class Comment : Archivable
     {
-        public int Id { get; set; }
-        public string Text { get; set; }
-        public User User { get; set; }
+        public int Id { get; set; } = default!;
+        public string Text { get; set; } = default!;
+		public User User { get; set; } = default!;
     }
 }

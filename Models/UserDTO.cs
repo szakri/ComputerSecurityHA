@@ -5,8 +5,8 @@ namespace Models
     public class UserDTO
     {
         [JsonPropertyName("id")]
-        public string Id { get; set; }
-        [JsonPropertyName("username")]
-        public string Username { get; set; }
-    }
+        public string Id { get; set; } = default!;
+		[JsonPropertyName("username")]
+        public string Username { get; set; } = default!;
+	}
 }
