@@ -21,7 +21,8 @@ namespace Backend.Services
             Directory.CreateDirectory(combined);
             var filePath = Path.Combine($"{hashedId}",
                 $"{Path.GetFileNameWithoutExtension(file.FileName)}_{DateTime.UtcNow:yyyy.MM.dd.HH-mm-ss-f-ff}.caff");
-            file.CopyTo(new FileStream(Path.Combine("Files", filePath), FileMode.Create));
+            var stream = new FileStream(Path.Combine("Files", filePath), FileMode.Create);
+            file.CopyTo(stream);
             try
             {
                 GeneratePreview(filePath);
@@ -29,7 +30,8 @@ namespace Backend.Services
             }
             catch (CaffException ex)
             {
-                //File.Delete(Path.Combine("Files", filePath));
+                stream?.Dispose();
+                File.Delete(Path.Combine("Files", filePath));
                 throw ex;
             }
         }
