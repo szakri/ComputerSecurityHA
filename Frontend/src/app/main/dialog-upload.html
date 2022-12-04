@@ -1,0 +1,7 @@
+<h1 mat-dialog-title>Upload CAFF</h1>
+<div mat-dialog-content>
+  <input type="file" class="file-input"
+         (change)="onFileSelected($event)" #fileUpload>
+
+  <button mat-raised-button color="primary" (click)="saveDialog()">Upload</button>
+</div>

@@ -1,0 +1,48 @@
+.details-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height:100%;
+}
+
+.details-container mat-card
+{
+    margin:15px;
+    width:50%;
+    height:100%;
+}
+
+
+mat-card .divider-card{
+    width:calc(100% - 30px);
+    max-height:150px;
+    
+}
+
+mat-card .second-card{
+    width:calc(100% - 30px);
+    height:auto;
+    overflow:auto;
+    
+}
+
+.comments{
+  margin: 30px;
+  margin-bottom: 15px;
+  margin-top: 5px;
+    overflow-y:auto;
+}
+
+.comment-form {
+  font-size: 10px;
+
+}
+.comment-form mat-form-field{
+    margin:10px;
+    margin-bottom:0px;
+    margin-left:15px;
+    margin-right:25px;
+    width:calc(100% - 150px);
+}
+
+

@@ -1,0 +1,6 @@
+<mat-toolbar color="primary" style="justify-content: space-between">
+  <span>CAFF WebShop</span>
+  <button mat-icon-button (click)="logoutFromWebshop()" routerLink="/auth" *ngIf="isloggedin()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
