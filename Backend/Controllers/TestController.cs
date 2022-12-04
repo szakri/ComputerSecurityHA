@@ -18,16 +18,21 @@ namespace Backend.Controllers
     public class TestController : ControllerBase
     {
         private readonly CaffContext context;
-        private readonly IConfiguration configuration;
 
-        public TestController(CaffContext context, IConfiguration configuration)
+        public TestController(CaffContext context)
         {
             this.context = context;
-            this.configuration = configuration;
         }
 
-        [HttpGet("initDB")]
-        public void Init()
+		/// <summary>
+		/// Initializes the DB for testing (only available in debug mode)
+		/// </summary>
+		/// <response code="200">Successful initialization</response>
+		// GET /test/initdb
+		[HttpGet("initdb")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		public void Init()
         {
             if (((RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>()).Exists())
             {
@@ -83,8 +88,15 @@ namespace Backend.Controllers
             context.SaveChanges();
         }
 
-        [HttpGet("reset")]
-        public void Reset()
+		/// <summary>
+		/// Emptys all the tables (only available in debug mode)
+		/// </summary>
+		/// <response code="200">Successful reset</response>
+		// GET /test/reset
+		[HttpGet("reset")]
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		public void Reset()
         {
             var caffs = context.Caffs.ToArray();
             context.Caffs.RemoveRange(caffs);

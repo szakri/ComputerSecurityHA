@@ -84,8 +84,10 @@ namespace Backend
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
+			app.UseStatusCodePagesWithReExecute("/");
+
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -99,9 +101,10 @@ namespace Backend
             app.UseRouting();
             app.UseCors(CorsPolicy);
 
-            app.UseAuthorization();
+			app.UseDefaultFiles();
+			app.UseStaticFiles();
 
-            app.MapControllers();
+			app.MapControllers();
 
             app.Run();
         }
