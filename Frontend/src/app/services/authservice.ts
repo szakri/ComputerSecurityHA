@@ -1,13 +1,13 @@
 import { HttpClient, HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { catchError, Observable, tap, throwError } from "rxjs";
+import { catchError, Observable, tap } from "rxjs";
 import * as moment from 'moment';
 
 import { User } from "../models/user";
 import { environments } from "../../environments/environment";
 import { LoginResponse } from "../models/loginresponse";
 import { Router } from "@angular/router";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ErrorService } from "./errorservice";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json;' })
@@ -16,7 +16,7 @@ const httpOptions = {
 @Injectable()
 export class AuthService {
   backendUrl = environments.backendUrl;
-  constructor(private http: HttpClient, private router: Router, private snackbar: MatSnackBar) {}
+  constructor(private http: HttpClient, private router: Router, private errorService: ErrorService) { }
   login(username: string | null, password: string | null) {
 
 
@@ -32,7 +32,7 @@ export class AuthService {
         localStorage.setItem('user_name', JSON.stringify(username));
 
       })).pipe(
-        catchError(err => this.catchAuthError(err))
+        catchError(err => this.errorService.catchServiceError(err))
       ).subscribe(r => {
         this.router.navigate(['main']);
       });
@@ -41,23 +41,14 @@ export class AuthService {
         register(username: string | null, password: string | null) {
           return this.http.post<User>(this.backendUrl + '/users', { username, password })
             .pipe(
-              catchError(err => this.catchAuthError(err))
+              catchError(err => this.errorService.catchServiceError(err))
               )
             .subscribe(res => {
               this.login(username, password);
             });
         }
 
-        catchAuthError(error: any): Observable<Response> {
-          if (error && error.error) {
-            this.snackbar.open(error.error, "", { duration: 3000 });
-          } else if (error) {
-            this.snackbar.open(error, "", { duration: 3000 });
-          } else {
-            this.snackbar.open(JSON.stringify(error), "", { duration: 3000 });
-          }
-          return throwError(() => new Error(error));
-        }
+        
 
         logout() {
           localStorage.removeItem("id_token");

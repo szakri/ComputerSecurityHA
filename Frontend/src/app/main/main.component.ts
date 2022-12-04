@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { catchError} from 'rxjs';
 import { Caff } from '../models/caff';
 import { CaffPreview } from '../models/caffpreview';
 import { CaffService } from '../services/caffservice';
+import { ErrorService } from '../services/errorservice';
 
 @Component({
   selector: 'app-main',
@@ -87,7 +89,7 @@ export class DialogUploadCAFF {
   file!: File;
 
 
-  constructor(public dialogRef: MatDialogRef<DialogUploadCAFF>, private caffService: CaffService) { }
+  constructor(public dialogRef: MatDialogRef<DialogUploadCAFF>, private caffService: CaffService, private errorService: ErrorService) { }
 
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -103,9 +105,12 @@ export class DialogUploadCAFF {
   }
 
   saveDialog() {
-    const upload$ = this.caffService.uploadCaff(this.formData);
-
-    upload$.subscribe(res => 
+    this.caffService.uploadCaff(this.formData).pipe(
+      catchError(err => {
+        this.dialogRef.close();
+        return this.errorService.catchServiceError(err);
+      })
+    ).subscribe(res =>
       this.dialogRef.close()
     );
   }
