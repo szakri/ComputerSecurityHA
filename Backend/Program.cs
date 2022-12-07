@@ -93,15 +93,15 @@ namespace Backend
                 app.UseSwaggerUI();
             }
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseRouting();
             app.UseCors(CorsPolicy);
 
-			app.UseDefaultFiles();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseDefaultFiles();
 			app.UseStaticFiles();
 
 			app.MapControllers();
